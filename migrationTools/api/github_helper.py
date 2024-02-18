@@ -1,18 +1,19 @@
 from github import Github
 
 class githubHelper():
-    def __init__(self, repo_name):
+    def __init__(self, repo_name, file_name, file_location):
         self.github_token = ''
         self.repo_name = repo_name
+        self.file_name = file_name
+        self.file_location = file_location
+        self.full_file_loc = file_location+file_name
 
     def get_migration(self):
-        # auth = Auth.Token(self.github_token)
         g = Github(self.github_token)
         repo = g.get_repo(self.repo_name)
-        contents = repo.get_contents("README.md")
-        print(contents)
+        contents = repo.get_contents(self.full_file_loc)
+        print(contents.decoded_content.decode())
 
-instance = githubHelper()
+instance = githubHelper("fmaulana240699/mysql-migration-tools", "test.sql", "migrations-data/")
 instance.get_migration()
 
-#'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'
