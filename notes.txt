@@ -1,0 +1,3 @@
+todo: 
+logic get + read latest file >> logic compare file name in folder with the db
+logic pas run migration harus dibikin async di background

@@ -1,5 +1,6 @@
 from .models import migrationData, repoIntegration
 from .serializers import migrationDataSerializer, repoIntegrationSerializer
+from .github_helper import githubHelper
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
@@ -9,58 +10,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.forms.models import model_to_dict
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from datetime import timedelta, datetime
-from django.http import JsonResponse
-import json
 from django.core.serializers import serialize
-    
-'''         
-class PeminjamanListPerUserAPIView(generics.ListAPIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdmin | IsItSupport ]
-
-    queryset = Peminjaman.objects.all()
-    serializer_class = PeminjamanSerializer
-
-    def get(self, request, pk):
-        try:
-            list_peminjaman = Peminjaman.objects.filter(id_akun=pk)
-            serialized_data = serialize("json", list_peminjaman)
-            serialized_data = json.loads(serialized_data)
-            return Response(serialized_data, status=200)
-        except Barang.DoesNotExist:
-            return Response({'message': 'Peminjaman tidak ditemukan'}, status=404)   
-
-class PeminjamanListAPIView(generics.ListAPIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdmin | IsItSupport | IsKaryawan]
-
-    queryset = Peminjaman.objects.all()
-    serializer_class = PeminjamanSerializer
-
-class PeminjamanListCreateView(generics.ListCreateAPIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdmin | IsItSupport | IsKaryawan]
-
-    queryset = Peminjaman.objects.all()
-    serializer_class = CreatePeminjamanSerializer
-
-    def post(self, request):
-        data = request.data
-        serializer = CreatePeminjamanSerializer(data=data)
-        if serializer.is_valid():
-            validated_data = serializer.validated_data
-            tanggal_pengembalian_str = validated_data["tanggal_pengembalian"].strftime('%Y-%m-%d')
-            tanggal_peminjaman_str = validated_data["tanggal_peminjaman"].strftime('%Y-%m-%d')
-            durasi = datetime.strptime(tanggal_pengembalian_str, '%Y-%m-%d').date() - datetime.strptime(tanggal_peminjaman_str, '%Y-%m-%d').date()
-            validated_data["durasi_peminjaman"] = durasi.days
-            validated_data["status_peminjaman"] = "Waiting Approval"
-
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)   
-
-'''
+import json
 
 class repoCreateListAPIView(generics.ListCreateAPIView):
     # authentication_classes = [JWTAuthentication]
@@ -70,3 +21,60 @@ class repoCreateListAPIView(generics.ListCreateAPIView):
 class migrationCreateListAPIView(generics.ListCreateAPIView):
     queryset = migrationData.objects.all()
     serializer_class = migrationDataSerializer 
+    def get(self, request):
+        data_git = githubHelper("fmaulana240699/mysql-migration-tools", "test.sql", "migrations-data/")
+        test = data_git.get_migration()
+        test2 = data_git.get_last_commit_author()
+        data=test+test2
+        return Response(data, status=200)
+    
+    def post(self, request):
+        data_git = githubHelper("fmaulana240699/mysql-migration-tools", request.data["file_name"], "migrations-data/")
+        data = request.data
+        try:
+            get_data = migrationData.objects.all()
+            filter = get_data.filter(id_repo=1).latest("created_at")
+            batch=filter.batch_version+1
+        except:
+            batch=1
+
+        serializer = migrationDataSerializer(data=data)
+        if serializer.is_valid():
+            serializer.validated_data["sql_query"] = data_git.get_migration()
+            serializer.validated_data["author"] = data_git.get_last_commit_author()
+            serializer.validated_data["batch_version"] = batch
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)     
+
+class WebhookAPIView(generics.ListAPIView):
+    # authentication_classes = [JWTAuthentication]
+
+    queryset = migrationData.objects.all()
+    serializer_class = migrationDataSerializer
+
+    def get(self, request):
+        not_yet = []
+        try:
+            last_migrate = self.queryset.filter(id_repo=1)
+            dict = self.serializer_class(last_migrate, many=True)
+            
+            gh = githubHelper("fmaulana240699/mysql-migration-tools", "test.sql", "migrations-data/")
+            list_file = ['nyobain.sql', 'testing.sql'] #gh.compare_migration()
+            for x in list_file:
+                for y in dict.data:
+                    if x in y["file_name"]:
+                        print("done")
+                    else:
+                        print("belum")  
+                        not_yet.append(x)
+            print(set(not_yet))
+            
+            # put on celery to for the query to be executed
+
+        except:
+            return Response("test", status=400) 
+        
+        return Response("error", status=200)
+        
+       
+

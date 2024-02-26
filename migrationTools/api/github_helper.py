@@ -12,8 +12,21 @@ class githubHelper():
         g = Github(self.github_token)
         repo = g.get_repo(self.repo_name)
         contents = repo.get_contents(self.full_file_loc)
-        print(contents.decoded_content.decode())
+        return contents.decoded_content.decode()
 
-instance = githubHelper("fmaulana240699/mysql-migration-tools", "test.sql", "migrations-data/")
-instance.get_migration()
+    def get_last_commit_author(self):
+        g = Github(self.github_token)
+        repo = g.get_repo(self.repo_name)
+        commits = repo.get_commits(path=self.full_file_loc)
+        last_commit = commits[0]
+        return last_commit.commit.author.name
+    
+    def compare_migration(self):
+        g = Github(self.github_token)
+        repo = g.get_repo(self.repo_name)
+        contents = repo.get_contents(self.full_file_loc)
+        return contents.name
+
+# instance = githubHelper("fmaulana240699/mysql-migration-tools", "test.sql", "migrations-data/")
+# instance.compare_migration()
 
