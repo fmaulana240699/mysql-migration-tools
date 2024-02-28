@@ -1,4 +1,4 @@
-use database testing;
+//use database testing;
 
 CREATE TABLE Persons (
     PersonID int,
