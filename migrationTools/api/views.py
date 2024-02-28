@@ -1,6 +1,7 @@
-from .models import migrationData, repoIntegration
-from .serializers import migrationDataSerializer, repoIntegrationSerializer
+from .models import migrationData, repoIntegration, migrationConfig
+from .serializers import migrationDataSerializer, repoIntegrationSerializer, migrationConfigSerializer
 from .github_helper import githubHelper
+from .tasks import execute_remote_query
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
@@ -16,35 +17,17 @@ import json
 class repoCreateListAPIView(generics.ListCreateAPIView):
     # authentication_classes = [JWTAuthentication]
     queryset = repoIntegration.objects.all()
-    serializer_class = repoIntegrationSerializer 
+    serializer_class = repoIntegrationSerializer   
 
-class migrationCreateListAPIView(generics.ListCreateAPIView):
+class migrationHistoryAPIView(generics.ListAPIView):
+    # authentication_classes = [JWTAuthentication]
     queryset = migrationData.objects.all()
-    serializer_class = migrationDataSerializer 
-    def get(self, request):
-        data_git = githubHelper("fmaulana240699/mysql-migration-tools", "test.sql", "migrations-data/")
-        test = data_git.get_migration()
-        test2 = data_git.get_last_commit_author()
-        data=test+test2
-        return Response(data, status=200)
+    serializer_class = migrationDataSerializer
     
-    def post(self, request):
-        data_git = githubHelper("fmaulana240699/mysql-migration-tools", request.data["file_name"], "migrations-data/")
-        data = request.data
-        try:
-            get_data = migrationData.objects.all()
-            filter = get_data.filter(id_repo=1).latest("created_at")
-            batch=filter.batch_version+1
-        except:
-            batch=1
 
-        serializer = migrationDataSerializer(data=data)
-        if serializer.is_valid():
-            serializer.validated_data["sql_query"] = data_git.get_migration()
-            serializer.validated_data["author"] = data_git.get_last_commit_author()
-            serializer.validated_data["batch_version"] = batch
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)     
+class migrationConfigCreateListAPIView(generics.ListCreateAPIView):
+    queryset = migrationConfig.objects.all()
+    serializer_class = migrationConfigSerializer
 
 class WebhookAPIView(generics.ListAPIView):
     # authentication_classes = [JWTAuthentication]
@@ -57,24 +40,33 @@ class WebhookAPIView(generics.ListAPIView):
         try:
             last_migrate = self.queryset.filter(id_repo=1)
             dict = self.serializer_class(last_migrate, many=True)
-            
-            gh = githubHelper("fmaulana240699/mysql-migration-tools", "test.sql", "migrations-data/")
-            list_file = ['nyobain.sql', 'testing.sql'] #gh.compare_migration()
+            gh = githubHelper("fmaulana240699/mysql-migration-tools", "migrations-data")
+            list_file = gh.get_list_file()
             for x in list_file:
                 for y in dict.data:
                     if x in y["file_name"]:
-                        print("done")
+                        # print("done")
+                        pass
                     else:
-                        print("belum")  
+                        # print("belum")  
                         not_yet.append(x)
-            print(set(not_yet))
+            
+            test = list(set(not_yet))
+            query = []
+            for z in test:
+                # print(z)
+                query.append(gh.get_migration(z))
             
             # put on celery to for the query to be executed
+            for p in query:
+                execute_remote_query.delay(p)
 
-        except:
+        except Exception as e:
+            print("a")
+            print(e)
             return Response("test", status=400) 
         
-        return Response("error", status=200)
+        return Response("good", status=200)
         
        
 

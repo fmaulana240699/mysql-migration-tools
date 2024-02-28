@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import migrationData, repoIntegration
+from .models import migrationData, repoIntegration, migrationConfig
 
 class migrationDataSerializer(serializers.ModelSerializer):
     sql_query = serializers.CharField(required=False)
@@ -8,6 +8,11 @@ class migrationDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = migrationData
         fields = '__all__'
+
+class migrationConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = migrationConfig
+        fields = '__all__'        
     
 class repoIntegrationSerializer(serializers.ModelSerializer):
     class Meta:

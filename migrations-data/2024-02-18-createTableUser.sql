@@ -1,4 +1,4 @@
-use database nyobain;
+use database testing;
 
 CREATE TABLE User (
     PersonID int,

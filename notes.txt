@@ -1,3 +1,21 @@
 todo: 
 logic get + read latest file >> logic compare file name in folder with the db
 logic pas run migration harus dibikin async di background
+
+create migration harus jalan
+webhook harus jalan
+get migration ambil dari db langsung, bukan dari git
+
+
+1. create repo (done)
+2. create migration config (done)
+3. test celery (done)
+4. setup mysql helper (done)
+5. compare migration yg udah di run sama yg belum
+6. get author perlu refactor
+6. update migration data based on celery task
+
+
+
+note: 
+1. encrypt token
