@@ -1,5 +1,3 @@
-//use database testing;
-
 CREATE TABLE Persons (
     PersonID int,
     LastName varchar(255),
