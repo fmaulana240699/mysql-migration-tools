@@ -1,11 +1,11 @@
 import mysql.connector
 
 class mysqlHelper():
-    def __init__(self, sql_commands):
-        self.host = "localhost"
-        self.username = "fmaulana"
-        self.password = "jaringan"
-        self.database = "testing"
+    def __init__(self, sql_commands, host, username, password, database):
+        self.host = host
+        self.username = username
+        self.password = password
+        self.database = database
         self.sql_commands = sql_commands
 
     def execute_query(self):
@@ -18,28 +18,37 @@ class mysqlHelper():
                 database=self.database
             )
 
+            connection.start_transaction()
+
             # Check if the connection was successful
             if connection.is_connected():
                 print("Connected to MySQL database")
 
                 try:
+                    #### create table migration on target db if not exist ####
                     cursor = connection.cursor(buffered=True)
+                    cursor.execute("CREATE TABLE IF NOT EXISTS migrations (id INT AUTO_INCREMENT PRIMARY KEY, batch_version VARCHAR(255))")
+
                     cursor.execute(self.sql_commands, multi=True)
+                   
+                    #### update migration batch version ####
+                    cursor.execute("INSERT INTO migrations (batch_version) VALUES (%s) ON DUPLICATE KEY UPDATE batch_version = VALUES(batch_version)", (self.batch_version,))
+
                     print("SQL commands executed successfully")
                 except mysql.connector.Error as e:
+                    connection.rollback()
                     print("Error executing SQL commands:", e)
+                    raise Exception("Error executing SQL commands: " + str(e))
                 finally:
                     cursor.close()  
 
         except mysql.connector.Error as e:
             print("Error connecting to MySQL:", e)
+            raise Exception("Error connecting to MySQL: " + str(e))
 
         finally:
             # Close the connection
             if 'connection' in locals() and connection.is_connected():
+                connection.commit()
                 connection.close()
                 print("MySQL connection closed")
-
-
-# test = mysqlHelper("select * from my_table")
-# test.execute_query()

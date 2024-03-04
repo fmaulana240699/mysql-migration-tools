@@ -11,9 +11,18 @@ get migration ambil dari db langsung, bukan dari git
 2. create migration config (done)
 3. test celery (done)
 4. setup mysql helper (done)
-5. compare migration yg udah di run sama yg belum
-6. get author perlu refactor
-6. update migration data based on celery task
+5. compare migration yg udah di run sama yg belum (done)
+6. pas jalanin background task insert history tapi status in queue (done)
+7. db creds jadiin param (done)
+11. batch version (done)
+8. pas jalanin task, update status jadi success, kalo error update failed + log (done)
+9. selalu kebaca success (done)
+6. get author perlu refactor (done)
+7. fix compare file logic (done)
+10. use transaction and rollback (done)
+11. update/create migration batch version in target db (done)
+
+
 
 
 

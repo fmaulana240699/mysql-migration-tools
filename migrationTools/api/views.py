@@ -34,37 +34,53 @@ class WebhookAPIView(generics.ListAPIView):
 
     queryset = migrationData.objects.all()
     serializer_class = migrationDataSerializer
+    not_yet = []
 
     def get(self, request):
-        not_yet = []
-        try:
-            last_migrate = self.queryset.filter(id_repo=1)
-            dict = self.serializer_class(last_migrate, many=True)
-            gh = githubHelper("fmaulana240699/mysql-migration-tools", "migrations-data")
-            list_file = gh.get_list_file()
-            for x in list_file:
-                for y in dict.data:
-                    if x in y["file_name"]:
-                        # print("done")
-                        pass
-                    else:
-                        # print("belum")  
-                        not_yet.append(x)
-            
-            test = list(set(not_yet))
-            query = []
-            for z in test:
-                # print(z)
-                query.append(gh.get_migration(z))
-            
-            # put on celery to for the query to be executed
-            for p in query:
-                execute_remote_query.delay(p)
+        
+        ### compare last migration ###
+        last_migrate = self.queryset.filter(id_repo=request.data["id_repo"])
+        dict = self.serializer_class(last_migrate, many=True)
+        gh = githubHelper("fmaulana240699/mysql-migration-tools", "migrations-data")
+        list_file = gh.get_list_file()
+        author = gh.get_last_commit_author()
 
-        except Exception as e:
-            print("a")
-            print(e)
-            return Response("test", status=400) 
+        for file_name in list_file:
+            found = False
+            for item in dict.data:
+                if file_name in item["file_name"]:
+                    found = True
+                    pass
+            if not found:
+                self.not_yet.append(file_name)        
+        print(len(self.not_yet))    
+        test = list(set(self.not_yet))
+
+        if len(test) != 0: 
+            try:
+                query = []
+                for z in test:
+                    query.append({"query": gh.get_migration(z), "file_loc": z})
+                
+                repo_integration_instance = repoIntegration.objects.get(pk=request.data["id_repo"])
+
+                ## batch logic
+                get_data = migrationData.objects.all()
+                filter = get_data.filter(id_repo=request.data["id_repo"]).latest("created_at")
+                batch=filter.batch_version+1
+
+                # put on celery to for the query to be executed
+                for p in query:
+                    history_id = migrationData.objects.create(sql_query=p["query"], status_query="in queue", batch_version=batch, author=author, error_log=None, file_name=p["file_loc"], id_repo=repo_integration_instance)
+                    execute_remote_query.delay(p["query"], request.data["id_repo"], history_id.id)
+                
+                test.clear()
+                self.not_yet.clear()
+            except Exception as e:
+                print(e)
+                return Response("error", status=400)
+        else:
+            print("skip gan")
         
         return Response("good", status=200)
         

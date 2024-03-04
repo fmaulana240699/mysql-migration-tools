@@ -9,12 +9,14 @@ class repoIntegration(models.Model):
 class migrationConfig(models.Model):
     id_repo = models.ForeignKey(repoIntegration, on_delete=models.CASCADE)
     folder_location = models.CharField(max_length=20)
-    #db_host
-    #db_user
+    db_host = models.CharField(max_length=20, null=True)
+    db_user = models.CharField(max_length=20, null=True)
+    db_name = models.CharField(max_length=20, null=True)
+    db_password = models.CharField(max_length=100, null=True)
 
 class migrationData(models.Model):
     sql_query = models.TextField()
-    status_query = models.BooleanField(null=True)
+    status_query = models.CharField(max_length=10)
     author = models.CharField(max_length=20)
     error_log = models.TextField(null=True)
     file_name = models.CharField(max_length=200, null=True)
