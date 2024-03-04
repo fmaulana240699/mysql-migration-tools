@@ -4,12 +4,12 @@ from .github_helper import githubHelper
 from .mysql_helper import mysqlHelper
 
 @shared_task
-def execute_remote_query(sql_query, id_repo, history_id):
+def execute_remote_query(sql_query, id_repo, history_id, batch_version):
     creds = migrationConfig.objects.get(id_repo=id_repo)
     testing = mysqlHelper(sql_query, creds.db_host, creds.db_user, creds.db_password, creds.db_name)
     repo_integration_instance = repoIntegration.objects.get(pk=id_repo)
     try:
-        testing.execute_query()
+        testing.execute_query(batch_version)
         migrationData.objects.filter(id=history_id).update(status_query="success", id_repo=repo_integration_instance)
     except Exception as e:
         migrationData.objects.filter(id=history_id).update(status_query="error", error_log=str(e), id_repo=repo_integration_instance)

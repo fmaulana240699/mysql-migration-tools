@@ -1,6 +1,7 @@
 from .models import migrationData, repoIntegration, migrationConfig
 from .serializers import migrationDataSerializer, repoIntegrationSerializer, migrationConfigSerializer
 from .github_helper import githubHelper
+import re
 from .tasks import execute_remote_query
 from rest_framework.views import APIView
 from rest_framework import generics
@@ -36,6 +37,13 @@ class WebhookAPIView(generics.ListAPIView):
     serializer_class = migrationDataSerializer
     not_yet = []
 
+    def filter_file_name(self, string):
+        pattern = r'\d{4}-\d{2}-\d{2}-\d{3}'
+        print(string)
+        match = re.search(pattern, string)
+        print(match)
+        return match
+
     def get(self, request):
         
         ### compare last migration ###
@@ -64,15 +72,10 @@ class WebhookAPIView(generics.ListAPIView):
                 
                 repo_integration_instance = repoIntegration.objects.get(pk=request.data["id_repo"])
 
-                ## batch logic
-                get_data = migrationData.objects.all()
-                filter = get_data.filter(id_repo=request.data["id_repo"]).latest("created_at")
-                batch=filter.batch_version+1
-
                 # put on celery to for the query to be executed
                 for p in query:
-                    history_id = migrationData.objects.create(sql_query=p["query"], status_query="in queue", batch_version=batch, author=author, error_log=None, file_name=p["file_loc"], id_repo=repo_integration_instance)
-                    execute_remote_query.delay(p["query"], request.data["id_repo"], history_id.id)
+                    history_id = migrationData.objects.create(sql_query=p["query"], status_query="in queue", author=author, error_log=None, file_name=p["file_loc"], id_repo=repo_integration_instance)
+                    execute_remote_query.delay(p["query"], request.data["id_repo"], history_id.id, self.filter_file_name(p["file_loc"]))
                 
                 test.clear()
                 self.not_yet.clear()

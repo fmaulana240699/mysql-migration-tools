@@ -16,11 +16,11 @@ class migrationConfig(models.Model):
 
 class migrationData(models.Model):
     sql_query = models.TextField()
-    status_query = models.CharField(max_length=10)
+    status_query = models.CharField(max_length=10, null=True)
     author = models.CharField(max_length=20)
     error_log = models.TextField(null=True)
     file_name = models.CharField(max_length=200, null=True)
-    batch_version = models.IntegerField(null=True)
+    # batch_version = models.IntegerField(null=True)
     id_repo = models.ForeignKey(repoIntegration, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
