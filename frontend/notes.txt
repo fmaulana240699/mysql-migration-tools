@@ -1,0 +1,48 @@
+Frontend
+- consume pagination (done)
+- styling (form, button) (done)
+- halaman edit data (done)
+- testing posting create data,edit data + delete data (done)
+- export history to pdf (dipindah ke fe, biar lebih rapih)
+- use token header on every api request (done)
+- bikin tombol logout (done)
+- implement role page (done)
+- force login (done)
+- beres login redirect ke home (done)
+- beres logout redirect ke home (done)
+- id repo option + jadi name (done)
+- buat tombol details di migration history (done)
+- styling form edit all (done)
+
+todo: 
+
+
+Backend
+- pagination (done)
+- edit data migration (done)
+- edit data repo (done)
+- delete data migration (done)
+- delete data repo (done)
+- get data per id for edit (done) 
+- testing posting create data,edit data + delete data (done)
+- login user (done)
+- role user (done)
+- encrypt token & db_password (done)
+- crud user (done)
+- testing role 1 endpoint (done)
+- apply permissions token on all api endpoint (done)
+- apply api endpoint permissions by role (done)
+- logout (done)
+- repo sama migration config ada author (done)
+- history tambahin db tujuan yg mana, repo tujuan yg mana (done)
+- cek lagi hardcode (done)
+- ubah id format tiap table (done)
+- repo sama migration config ada author > jadiin relation (done)
+- rename customusers jadi users (done)
+- slack notifications (done, tinggal testing, butuh slack url)
+- format update_at created_at ga usah sampe detik (done)
+- webhook trigger from github (perlu public url)
+- setting env for slack url + use mysql db (done)
+
+todo:
+- logout post to backend

@@ -1,0 +1,241 @@
+/* Google Fonts Import Link */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+body{
+  /* height: 20vh; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #c1f7f5;
+}
+.nav-links{
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 20px 15px;
+  border-radius: 12px;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+.nav-links li{
+  list-style: none;
+  margin: 0 12px;
+}
+.nav-links li a{
+  position: relative;
+  color: #333;
+  font-size: 20px;
+  font-weight: 500;
+  padding: 6px 0;
+  text-decoration: none;
+}
+.nav-links li a:before{
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: #34efdf;
+  border-radius: 12px;
+  transition: all 0.4s ease;
+}
+.nav-links li a:hover:before{
+  width: 100%;
+}
+.nav-links li.center a:before{
+  left: 50%;
+  transform: translateX(-50%);
+}
+.nav-links li.upward a:before{
+  width: 100%;
+  bottom: -5px;
+  opacity: 0;
+}
+.nav-links li.upward a:hover:before{
+  bottom: 0px;
+  opacity: 1;
+}
+.nav-links li.forward a:before{
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s ease;
+}
+.nav-links li.forward a:hover:before{
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  table {
+    width: 800px;
+    border-collapse: collapse;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    border-radius: 10px;
+  }
+  
+  th {
+    color: white;
+    padding: 15px;
+  }
+  td {
+    padding: 15px;
+    /* background-color: rgba(255,255,255,0.2); */
+    background-color: white;
+    color: #333;
+    text-align: center;
+  }
+  
+  th {
+    text-align: center;
+  }
+  
+  thead {
+    th {
+      background-color: #55608f;
+    }
+  }
+  
+  tbody {
+    tr {
+      &:hover {
+        background-color: rgba(255,255,255,0.3);
+      }
+    }
+    td {
+      position: relative;
+      &:hover {
+        &:before {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: -9999px;
+          bottom: -9999px;
+          background-color: rgba(255,255,255,0.2);
+          z-index: -1;
+        }
+      }
+    }
+  }
+
+/* CSS */
+.button-84 {
+  align-items: center;
+  background-color: initial;
+  background-image: linear-gradient(#464d55, #25292e);
+  border-radius: 8px;
+  border-width: 0;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, .1),0 3px 6px rgba(0, 0, 0, .05);
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  font-family: expo-brand-demi,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-size: 18px;
+  height: 52px;
+  justify-content: center;
+  line-height: 1;
+  margin: 0;
+  outline: none;
+  overflow: hidden;
+  padding: 0 32px;
+  text-align: center;
+  text-decoration: none;
+  transform: translate3d(0, 0, 0);
+  transition: all 150ms;
+  vertical-align: baseline;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-84:hover {
+  box-shadow: rgba(0, 1, 0, .2) 0 2px 8px;
+  opacity: .85;
+}
+
+.button-84:active {
+  outline: 0;
+}
+
+.button-84:focus {
+  box-shadow: rgba(0, 0, 0, .5) 0 0 0 3px;
+}
+
+@media (max-width: 420px) {
+  .button-84 {
+    height: 48px;
+  }
+}
+
+.form-mid {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0 auto;
+  background-color: #fcfcfc;
+  border-radius: 10px;
+  padding: 20px 50px 40px;
+  box-shadow: 1px 4px 10px 1px #aaa;
+  font-family: sans-serif;  
+}
+
+.form-mid form {
+  padding-top: 50px;
+}
+
+.form-mid input {
+  display: block;
+  height: 32px;
+  padding: 6px 16px;
+  width: 100%;
+  border: none;
+  background-color: #f3f3f3;
+  border-radius: 5px;
+}
+
+.form-mid label {
+  color: #777;
+  font-size: 0.8em;
+}
+
+
+.scrollable-table {
+  width: 100%;
+  overflow-y: scroll;
+  max-height: 750px; 
+  display: block;
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0 30px 0 10px;
+
+  border: 1px solid #e0e0e0;
+  border-radius: 3px;
+  line-height: 40px;
+  height: 40px;
+  background: #fff;
+  margin: 0 5px 5px 0;
+}
+select::-ms-expand {
+  display: none;
+}
