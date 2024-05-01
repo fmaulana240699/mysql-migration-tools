@@ -45,4 +45,5 @@ Backend
 - setting env for slack url + use mysql db (done)
 
 todo:
+- sesuain table tipe data sama max limit
 - logout post to backend

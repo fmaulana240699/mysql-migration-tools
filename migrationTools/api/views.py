@@ -114,8 +114,11 @@ class WebhookAPIView(generics.ListAPIView):
     not_yet = []
 
     def filter_file_name(self, string):
-        match = re.search(r'/([^/]+)$', string)
-        return match.group(0)
+        # match = re.search(r'/([^/]+)$', string)
+        # return match.group(0)
+        match = re.search(r'[^/]+$', string)
+        return match.group(0)        
+
 
     def get(self, request, identifier):
         
@@ -150,8 +153,8 @@ class WebhookAPIView(generics.ListAPIView):
 
                 # put on celery to for the query to be executed
                 for p in query:
-                    history_id = migrationData.objects.create(sql_query=p["query"], status_query="in queue", db_name=migration.db_name, engineer_name=author, error_log=None, file_name=p["file_loc"], id_repo=repo_integration_instance)
-                    execute_remote_query.delay(p["query"], identifier, history_id.id, str(self.filter_file_name(p["file_loc"])))
+                    history_id = migrationData.objects.create(sql_query=p["query"], status_query="in queue", db_name=migration.db_name, engineer_name=author, error_log=None, file_name=str(self.filter_file_name(p["file_loc"])), id_repo=repo_integration_instance)
+                    execute_remote_query.delay(p["query"], identifier, history_id.id, "/" + str(self.filter_file_name(p["file_loc"])))
                 
                 test.clear()
                 self.not_yet.clear()

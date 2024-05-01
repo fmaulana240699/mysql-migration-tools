@@ -9,9 +9,9 @@ class Users(AbstractUser):
         ('Viewer', 'Viewer')
     ]    
     id = models.CharField(max_length=5, primary_key=True, editable=False)
-    fullname = models.CharField(max_length=20)
-    username = models.CharField(max_length=20, unique=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    fullname = models.CharField(max_length=40)
+    username = models.CharField(max_length=15, unique=True)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     password = models.CharField(max_length=100)
 
     objects = UserManager()
@@ -38,9 +38,9 @@ class Users(AbstractUser):
 
 class repoIntegration(models.Model):
     id = models.CharField(max_length=5, primary_key=True, editable=False)
-    name = models.CharField(max_length=20)
-    username = models.CharField(max_length=20)
-    token = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=30)
+    username = models.CharField(max_length=30)
+    token = models.CharField(max_length=150, null=True)
     repo_url = models.CharField(max_length=100)
     author = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
 
@@ -59,7 +59,7 @@ class repoIntegration(models.Model):
 class migrationConfig(models.Model):
     id = models.CharField(max_length=6, primary_key=True, editable=False)
     id_repo = models.ForeignKey(repoIntegration, on_delete=models.CASCADE)
-    folder_location = models.CharField(max_length=20)
+    folder_location = models.CharField(max_length=30)
     db_host = models.CharField(max_length=20, null=True)
     db_user = models.CharField(max_length=20, null=True)
     db_name = models.CharField(max_length=20, null=True)
@@ -80,11 +80,11 @@ class migrationConfig(models.Model):
 
 class migrationData(models.Model):
     id = models.CharField(max_length=12, primary_key=True, editable=False)    
-    sql_query = models.TextField()
+    sql_query = models.TextField(max_length=250)
     status_query = models.CharField(max_length=10, null=True)
     engineer_name = models.CharField(max_length=20)
-    error_log = models.TextField(null=True)
-    file_name = models.CharField(max_length=200, null=True)
+    error_log = models.TextField(max_length=250, null=True)
+    file_name = models.CharField(max_length=50, null=True)
     id_repo = models.ForeignKey(repoIntegration, on_delete=models.CASCADE)
     db_name = models.CharField(max_length=20, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
