@@ -134,9 +134,12 @@ class WebhookAPIView(generics.ListAPIView):
 
         for file_name in list_file:
             found = False
+            print(file_name)
             for item in dict.data:
                 if file_name in item["file_name"]:
                     found = True
+                    print(file_name)
+                    print(item["file_name"])
                     pass
             if not found:
                 self.not_yet.append(file_name)        

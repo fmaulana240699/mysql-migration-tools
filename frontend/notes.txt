@@ -50,3 +50,4 @@ Backend
 - branch param (done)
 
 todo:
+- check runned script
