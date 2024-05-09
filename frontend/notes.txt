@@ -18,7 +18,6 @@ Frontend
 todo: 
 - export pdf
 - alert
-- logout post to backend
 
 Backend
 - pagination (done)
