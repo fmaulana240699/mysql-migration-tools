@@ -120,7 +120,7 @@ class WebhookAPIView(generics.ListAPIView):
         return match.group(0)        
 
 
-    def get(self, request, identifier):
+    def post(self, request, identifier):
         
         ### compare last migration ###
         last_migrate = self.queryset.filter(id_repo=identifier)
@@ -230,7 +230,7 @@ class LoginView(generics.GenericAPIView):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user': {
-                "id": user.id,
+                "username": user.username,
                 "role": user.role
                 # "fullname": user.fullname
             }

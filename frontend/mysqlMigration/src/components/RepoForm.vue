@@ -16,6 +16,11 @@
         <div class="form-group">
           <label for="token">Token:</label>
           <input type="password" id="token" v-model="formData.token" placeholder="Token" required />
+        </div>  
+        
+        <div class="form-group">
+          <label for="branch">Branch:</label>
+          <input type="text" id="branch" v-model="formData.branch" placeholder="Branch Name" required />
         </div>        
         
         <div class="form-group">
@@ -35,11 +40,12 @@
   export default {
     name: 'FormComponent',
     setup() {
-      const author = localStorage.getItem('userId');
+      const author = localStorage.getItem('username');
       const formData = ref({
         name: '',
         username: '',
         token: '',
+        branch: '',
         repo_url: '',
         author: author
       });
@@ -63,6 +69,7 @@
           formData.value.name &&
           formData.value.username &&
           formData.value.token &&
+          formData.value.branch &&
           formData.value.repo_url
         );
       };

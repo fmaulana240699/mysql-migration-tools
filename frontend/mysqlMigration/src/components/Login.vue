@@ -39,13 +39,13 @@
             const response = await axiosLoginInstance.post(`/login/`, formData.value);
 
             // const fullname = response.data['user']['fullname']
-            const userId = response.data['user']['id']
+            const username = response.data['user']['username']
             const role = response.data['user']['role']
             const accessToken = response.data['access']
 
   
             localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('userId', userId);
+            localStorage.setItem('username', username);
             localStorage.setItem('role', role);
             window.location.href = '/';
 

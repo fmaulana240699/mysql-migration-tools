@@ -14,8 +14,11 @@ Frontend
 - buat tombol details di migration history (done)
 - styling form edit all (done)
 
-todo: 
 
+todo: 
+- export pdf
+- alert
+- logout post to backend
 
 Backend
 - pagination (done)
@@ -43,7 +46,8 @@ Backend
 - format update_at created_at ga usah sampe detik (done)
 - webhook trigger from github (perlu public url)
 - setting env for slack url + use mysql db (done)
+- sesuain table tipe data sama max limit (done)
+- relation jadi username instead of id (done)
+- branch param (done)
 
 todo:
-- sesuain table tipe data sama max limit
-- logout post to backend

@@ -47,7 +47,7 @@ import axiosInstance from '@/config/axiosConfig';
 export default {
   name: 'FormComponent',
   setup() {
-    const author = localStorage.getItem('userId');
+    const author = localStorage.getItem('username');
     const repoList = ref([]);
     const formData = ref({
       folder_location: '',

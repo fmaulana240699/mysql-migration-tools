@@ -22,7 +22,7 @@
             <td> {{ migration_config.db_host }} </td>
             <td> {{ migration_config.db_user }} </td>
             <td> {{ migration_config.db_name }} </td>
-            <td> {{ migration_config.db_password }} </td>
+            <td> ********* </td>
             <td> {{ migration_config.id_repo }} </td>
             <td> {{ migration_config.author }} </td>
             <td> <button @click="editMigrationConfig(migration_config.id)"> <svg width="35px" height="35px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

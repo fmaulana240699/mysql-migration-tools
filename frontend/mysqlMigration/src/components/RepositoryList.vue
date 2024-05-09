@@ -6,6 +6,7 @@
         <tr>
           <th>Id</th>
           <th>Repository Name</th>
+          <th>Branch Name</th>
           <th> Repo URL </th>
           <th> Author </th>
           <th colspan="2"> Action </th>
@@ -15,6 +16,7 @@
         <tr v-for="repo in repos" :key="repo.id">
             <td> {{ repo.id }} </td>
             <td> {{ repo.name }} </td>
+            <td> {{ repo.branch }} </td>
             <td> {{ repo.repo_url }}  </td>
             <td> {{ repo.author }}  </td>
             <td> <button @click="editRepo(repo.id)"> <svg width="35px" height="35px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

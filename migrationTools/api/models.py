@@ -41,8 +41,9 @@ class repoIntegration(models.Model):
     name = models.CharField(max_length=30)
     username = models.CharField(max_length=30)
     token = models.CharField(max_length=150, null=True)
+    branch = models.CharField(max_length=20, null=True)
     repo_url = models.CharField(max_length=100)
-    author = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, to_field='username')
 
     def encrypt(self,raw_token):
         self.token=encrypt_data(raw_token)
@@ -64,7 +65,7 @@ class migrationConfig(models.Model):
     db_user = models.CharField(max_length=20, null=True)
     db_name = models.CharField(max_length=20, null=True)
     db_password = models.CharField(max_length=100, null=True)
-    author = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, to_field='username')
     
     def encrypt(self,raw_password):
         self.db_password=encrypt_data(raw_password)
