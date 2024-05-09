@@ -128,7 +128,7 @@ class WebhookAPIView(generics.ListAPIView):
         migration = migrationConfig.objects.get(id_repo=identifier)
         repo = repoIntegration.objects.get(pk=identifier)
         repo.decrypt()
-        gh = githubHelper(repo.repo_url, migration.folder_location, repo.token)
+        gh = githubHelper(repo.repo_url, migration.folder_location, repo.branch, repo.token)
         list_file = gh.get_list_file()
         author = gh.get_last_commit_author()
 
