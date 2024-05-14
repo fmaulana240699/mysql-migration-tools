@@ -1,6 +1,13 @@
 <template>
 <div class="container">
-  <button class="button-84" @click="exportToPDF">Export to PDF</button>
+  <div class="dropdown" @click="toggleDropdown">
+      <button class="dropbtn">Export Data</button>
+      <div :class="{ 'dropdown-content': true, 'show': showDropdown }" id="myDropdown">
+        <a @click="exportPDF('1_day')">1 Day</a>
+        <a @click="exportPDF('1_week')">1 Week</a>
+        <a @click="exportPDF('1_month')">1 Month</a>
+      </div>
+  </div> 
     <table class="scrollable-table" ref="migrationHistory">
       <thead>
         <tr>
@@ -48,8 +55,6 @@
 </template>
 
 <script>
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import axiosInstance from '@/config/axiosConfig';
 
 export default {
@@ -58,6 +63,7 @@ export default {
       migrations: [],
       nextPage: null,
       prevPage: null,
+      showDropdown: false
     };
   },
   mounted() {
@@ -78,20 +84,106 @@ export default {
     async detailsPage(migrationId) {
       window.location.href = `/migrations/${migrationId}`;
     },
-    exportToPDF() {
-      const table = this.$refs.migrationHistory;
+    toggleDropdown() {
+      this.showDropdown = !this.showDropdown;
+    },
+    async exportPDF(timeRange) {
+      try {
+        const response = await axiosInstance.get(`/migration/export/?time_range=${timeRange}`, {responseType: 'blob'});
+        // Create a Blob object from the response data
+        const blob = new Blob([response.data], { type: 'application/pdf' });
 
-      html2canvas(table).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF();
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        // Create a URL for the Blob
+        const url = window.URL.createObjectURL(blob);
 
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('export.pdf');
-      });
+        // Create a link element
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'exported_file.pdf'); // Set the filename for download
+
+        // Append the link to the document body and click it to trigger download
+        document.body.appendChild(link);
+        link.click();
+
+        // Remove the link from the document body
+        document.body.removeChild(link);
+
+        // Release the URL object
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error exporting PDF:', error);
+      }
     }
   },
 };
 </script>
+<style>
+ /* Dropdown Button */
+ .dropbtn {
+  align-items: center;
+  background-color: initial;
+  background-image: linear-gradient(#464d55, #25292e);
+  border-radius: 8px;
+  border-width: 0;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, .1),0 3px 6px rgba(0, 0, 0, .05);
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  font-family: expo-brand-demi,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-size: 18px;
+  height: 52px;
+  justify-content: center;
+  line-height: 1;
+  margin: 0;
+  outline: none;
+  overflow: hidden;
+  padding: 0 32px;
+  text-align: center;
+  text-decoration: none;
+  transform: translate3d(0, 0, 0);
+  transition: all 150ms;
+  vertical-align: baseline;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+/* Dropdown button on hover & focus */
+.dropbtn:hover, .dropbtn:focus {
+  box-shadow: rgba(0, 1, 0, .2) 0 2px 8px;
+  opacity: .85;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #ddd;}
+
+/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+.show {display:block;} 
+</style>

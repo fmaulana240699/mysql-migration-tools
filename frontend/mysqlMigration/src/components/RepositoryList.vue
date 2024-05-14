@@ -6,6 +6,7 @@
         <tr>
           <th>Id</th>
           <th>Repository Name</th>
+          <th>Username</th>
           <th>Branch Name</th>
           <th> Repo URL </th>
           <th> Author </th>
@@ -16,6 +17,7 @@
         <tr v-for="repo in repos" :key="repo.id">
             <td> {{ repo.id }} </td>
             <td> {{ repo.name }} </td>
+            <td> {{ repo.username }} </td>
             <td> {{ repo.branch }} </td>
             <td> {{ repo.repo_url }}  </td>
             <td> {{ repo.author }}  </td>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Report</title>
+    <style>
+        @page {
+            size: 25cm 21cm; 
+            margin: 1cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            /* width: 100%; */
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 4px;
+            text-align: center;
+            /* word-wrap: break-word; */
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .id { width: 80px; }
+        .sql_query { width: 200px; }
+        .status_query { width: 55px; }
+        .engineer_name { width: 75px; }
+        .error_log { width: 55px; }
+        .file_name { width: 198px; }
+        .id_repo { width: 55px; }
+        .db_name { width: 75px; }
+        .created_at { width: 135px; }        
+    </style>
+</head>
+<body>
+    <h1>Data Report</h1>
+    <table>
+        <thead>
+            <tr>
+                <th class="id">ID</th>
+                <th class="sql_query">SQL Query</th>
+                <th class="status_query">Status Query</th>
+                <th class="engineer_name">Engineer Name</th>
+                <th class="error_log">Error Log</th>
+                <th class="file_name">File Name</th>
+                <th class="id_repo">ID Repo</th>
+                <th class="db_name">Database Name</th>
+                <th class="created_at">Created At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td class="id">{{ item.pk }}</td> 
+                <td class="sql_query">{{ item.fields.sql_query }}</td>
+                <td class="status_query">{{ item.fields.status_query }}</td>
+                <td class="engineer_name">{{ item.fields.engineer_name }}</td>
+                <td class="error_log">{{ item.fields.error_log }}</td>
+                <td class="file_name">{{ item.fields.file_name }}</td>
+                <td class="id_repo">{{ item.fields.id_repo }}</td>
+                <td class="db_name">{{ item.fields.db_name }}</td>
+                <td class="created_at">{{ item.fields.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

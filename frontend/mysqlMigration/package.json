@@ -15,7 +15,8 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vue-sweetalert2": "^5.0.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

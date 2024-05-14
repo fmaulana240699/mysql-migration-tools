@@ -12,10 +12,15 @@
         <label for="username">Username:</label>
         <input type="text" id="username" v-model="formData.username" required />
       </div>
+
+      <div class="form-group">
+        <label for="branch">Branch:</label>
+        <input type="text" id="branch" v-model="formData.branch" required />
+      </div>      
       
       <div class="form-group">
         <label for="token">Token:</label>
-        <input type="password" id="token" required />
+        <input type="password" id="token" />
       </div>
       
       <div class="form-group">
@@ -46,6 +51,7 @@ export default {
       formData: {
         name: '',
         username: '',
+        branch: '',
         token: '',
         repo_url: ''
       },
@@ -56,13 +62,14 @@ export default {
         try {
           const response = await axiosInstance.patch(`/repo/${this.repoId}/`, this.formData);
           console.log('Form submitted:', response.data);
+          window.location.href = `/repository`;
         } catch (error) {
           console.error('Error submitting form:', error);
         }
     },
     async fetchData() {
       try {
-        const response = await axiosInstance.get(`/repo/${this.repoId}`);
+        const response = await axiosInstance.get(`/repo/${this.repoId}/`);
         this.formData = response.data
 
       } catch (error) {
@@ -86,5 +93,3 @@ label {
   margin-bottom: 5px;
 }
 </style>
-
-@/config/axiosConfig

@@ -13,11 +13,14 @@ Frontend
 - id repo option + jadi name (done)
 - buat tombol details di migration history (done)
 - styling form edit all (done)
-
+- edit migration config pake repo name (done)
+- export pdf > ada pilihan berapa lama, sehari, seminggu & sebulan (done)
+- redirect after edit repo and migrate config (done)
 
 todo: 
-- export pdf
 - alert
+- add user redirect
+
 
 Backend
 - pagination (done)
@@ -50,4 +53,15 @@ Backend
 - branch param (done)
 
 todo:
-- check runned script
+- migration version check
+schema format ganti jadi "2024-02-18-001"
+
+
+RekeningkuDev/trading-engine
+trading-engine/pro/trade/pkg/mysql/migration
+rekeningku_main
+10.20.0.16
+r3keningku
+
+
+user edit

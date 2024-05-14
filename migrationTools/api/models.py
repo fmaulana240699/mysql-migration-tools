@@ -60,7 +60,7 @@ class repoIntegration(models.Model):
 class migrationConfig(models.Model):
     id = models.CharField(max_length=6, primary_key=True, editable=False)
     id_repo = models.ForeignKey(repoIntegration, on_delete=models.CASCADE)
-    folder_location = models.CharField(max_length=30)
+    folder_location = models.CharField(max_length=50)
     db_host = models.CharField(max_length=20, null=True)
     db_user = models.CharField(max_length=20, null=True)
     db_name = models.CharField(max_length=20, null=True)

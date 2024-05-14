@@ -25,12 +25,12 @@
 
       <div class="form-group">
         <label for="db_password">Database Password :</label>
-        <input type="password" id="db_password" required />
+        <input type="password" id="db_password" />
       </div>    
       
       <div class="form-group">
         <label for="id_repo">Repo :</label>
-        <input type="text" id="id_repo" v-model="formData.id_repo" required />
+        <input type="text" id="id_repo" v-model="formData.id_repo" v-for="repo in repoList" :key="repo.id" :value="repo.name" disabled />
       </div>          
       
       <button type="submit" class="button-84">Submit</button>
@@ -58,15 +58,20 @@ export default {
         db_user: '',
         db_name: '',
         db_password: '',
+        name: '',
         id_repo: ''
       },
+      repoList: ''
     };
   },
   methods: {
     async handleSubmit() {
         try {
+          if (!this.formData.db_password) {
+            delete this.formData.db_password;
+          }
           const response = await axiosInstance.patch(`/migration/config/${this.configId}/`, this.formData);
-          console.log('Form submitted:', response.data);
+          window.location.href = `/migrations/config`;
         } catch (error) {
           console.error('Error submitting form:', error);
         }
@@ -79,10 +84,21 @@ export default {
         console.error("Error fetching data:", error);
       }
     },
+    async fetchRepos () {
+      try {
+        const response = await axiosInstance.get(`/repo/${this.formData.id_repo}`);
+        this.repoList = response.data;
+        // console.log(this.repoList[0]["name"]);
+      } catch (error) {
+        console.error("Error fetching repos:", error);
+      }
+    },
+    
   },
   mounted() {
     this.fetchData();
-  },   
+    this.fetchRepos();
+  },
 };  
 </script>
 

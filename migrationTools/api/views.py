@@ -4,6 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .github_helper import githubHelper
 import re
+import json
 from rest_framework.response import Response
 from django.template.loader import get_template
 from .tasks import execute_remote_query
@@ -17,6 +18,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.forms.models import model_to_dict
 from rest_framework.permissions import IsAuthenticated
 from django.core.serializers import serialize
+from xhtml2pdf import pisa
+from io import BytesIO
+from datetime import timedelta
+from django.utils import timezone
+
 
 class repoCreateListAPIView(generics.ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
@@ -30,7 +36,6 @@ class RepoDeleteView(APIView):
 
     def delete(self, request):
         repo_id = request.data.get('id')
-
         try:
             repo = repoIntegration.objects.get(id=repo_id)
             repo.delete()
@@ -42,17 +47,17 @@ class RepoUpdateView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated & IsAdmin]  
 
-    def get(self, request, pk):
+    def get(self, request, identifier):
         try:
-            repo = repoIntegration.objects.get(pk=pk)
+            repo = repoIntegration.objects.get(id=identifier)
             repo = model_to_dict(repo)
             return Response(repo, status=200)
         except repoIntegration.DoesNotExist:
             return Response({'message': 'Repository tidak ditemukan'}, status=404)   
 
-    def patch(self, request, pk):
+    def patch(self, request, identifier):
         try:
-            repo = repoIntegration.objects.get(pk=pk)
+            repo = repoIntegration.objects.get(id=identifier)
             serializer = repoIntegrationSerializer(repo, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
@@ -85,22 +90,19 @@ class MigrationConfigUpdateView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated & IsAdmin]
 
-    def get(self, request, pk):
+    def get(self, request, identifier):
         try:
-            migration = migrationConfig.objects.get(pk=pk)
+            migration = migrationConfig.objects.get(id=identifier)
             migration = model_to_dict(migration)
             return Response(migration, status=200)
         except migrationConfig.DoesNotExist:
             return Response({'message': 'Migration tidak ditemukan'}, status=404)     
 
-    def patch(self, request, pk):
+    def patch(self, request, identifier):
         try:
-            migration = migrationConfig.objects.get(pk=pk)
+            migration = migrationConfig.objects.get(id=identifier)
             serializer = migrationConfigSerializer(migration, data=request.data, partial=True)
             if serializer.is_valid():
-                validated_data = serializer.validated_data
-                if validated_data.get("db_password"):
-                    validated_data["db_password"] = make_password(request.data["db_password"])
                 serializer.save()
                 return Response(serializer.data, status=200)
             return Response(serializer.errors, status=400)
@@ -114,11 +116,14 @@ class WebhookAPIView(generics.ListAPIView):
     not_yet = []
 
     def filter_file_name(self, string):
-        # match = re.search(r'/([^/]+)$', string)
-        # return match.group(0)
         match = re.search(r'[^/]+$', string)
-        return match.group(0)        
+        return match.group(0)   
 
+    def filter_batch(self, string):
+        pattern = r"/(\d{4}-\d{2}-\d{2}-\d{3})-"
+        match = re.search(pattern, string)
+
+        return match.group(1)
 
     def post(self, request, identifier):
         
@@ -131,15 +136,17 @@ class WebhookAPIView(generics.ListAPIView):
         gh = githubHelper(repo.repo_url, migration.folder_location, repo.branch, repo.token)
         list_file = gh.get_list_file()
         author = gh.get_last_commit_author()
+        # for x in list_file:
+        #     print(str(self.filter_file_name(x)))
+        # print("testing")
+        for y in dict.data:
+            print(y["file_name"])
 
         for file_name in list_file:
             found = False
-            print(file_name)
             for item in dict.data:
                 if file_name in item["file_name"]:
                     found = True
-                    print(file_name)
-                    print(item["file_name"])
                     pass
             if not found:
                 self.not_yet.append(file_name)        
@@ -251,7 +258,7 @@ class LogoutView(generics.GenericAPIView):
             return Response(status=205)
         except Exception as e:
             return Response(status=400)       
-        
+
 
 class UserDeleteView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -273,7 +280,7 @@ class UserUpdateView(APIView):
 
     def get(self, request, pk):
         try:
-            user = Users.objects.get(pk=pk)
+            user = Users.objects.get(id=pk)
             user = model_to_dict(user)
             return Response(user, status=200)
         except Users.DoesNotExist:
@@ -281,7 +288,7 @@ class UserUpdateView(APIView):
 
     def patch(self, request, pk):
         try:
-            user = Users.objects.get(pk=pk)
+            user = Users.objects.get(id=pk)
             serializer = UserSerializer(user, data=request.data, partial=True)
             if serializer.is_valid():
                 validated_data = serializer.validated_data
@@ -298,3 +305,52 @@ class UserListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated & IsAdmin]      
     queryset = Users.objects.all()
     serializer_class = UserSerializer
+
+class ExportHistory(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated & (IsAdmin | IsViewer)]  
+
+    def render_to_pdf(self, template_src, context_dict):
+        template = get_template(template_src)
+        html = template.render(context_dict)
+        result = BytesIO()
+        pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+        if not pdf.err:
+            return HttpResponse(result.getvalue(), content_type='application/pdf')
+        return None
+
+
+    def get(self, request):
+
+        time_range = request.GET.get('time_range')
+
+        # Define start and end dates based on the time range
+        end_date = timezone.now()
+        if time_range == '1_day':
+            start_date = end_date - timedelta(days=1)
+        elif time_range == '1_week':
+            start_date = end_date - timedelta(weeks=1)
+        elif time_range == '1_month':
+            start_date = end_date - timedelta(days=30)
+
+        # Fetch data from the model within the specified time range
+        data = migrationData.objects.filter(created_at__range=(start_date, end_date))
+
+        # Serialize the queryset to JSON
+        json_data = serialize('json', data)
+
+        # Convert JSON data to a Python dictionary
+        data_dict = json.loads(json_data)
+
+        # Prepare data for the template
+        context = {
+            'data': data_dict,
+        }
+
+        # Render the HTML template to a PDF
+        pdf = self.render_to_pdf('pdf_template.html', context)
+        if pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="data.pdf"'
+            return response
+        return HttpResponse("Error generating PDF", status=400)
