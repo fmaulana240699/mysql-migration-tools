@@ -1,5 +1,9 @@
 <template>
 <div class="container">
+    <div v-if="showAlert" class="alert">
+      <span class="closebtn" @click="closeAlert">&times;</span> 
+      <strong>Oops!</strong> {{ alertMessage }}
+    </div>
     <a class="testing" href="/migrations/config/create"><button class="button-84"> Add New Migration Config </button></a>
     <table>
       <thead>
@@ -52,6 +56,8 @@ export default {
     return {
       selectedConfigId: null,
       migrations: [],
+      showAlert: false,
+      alertMessage: '',      
     };
   },
   methods: {
@@ -60,7 +66,9 @@ export default {
         const response = await axiosInstance.get(`/migration/config/`);
         this.migrations = response.data
       } catch (error) {
-        console.error("Error fetching repos:", error);
+        console.error("Error fetching migration config:", error);
+        this.alertMessage = 'Error fetching migration config: ' + error.message;
+        this.showAlert = true;        
       }
     },
     editMigrationConfig(configId) {
@@ -69,12 +77,33 @@ export default {
     async deleteMigrationConfig(configId) {
       try {
         const response = await axiosInstance.delete(`/migration/config/delete/`, {data: {"id": configId}});
+        if (response.status === 200) {
+          await this.fetchRepos();
+        } else {
+          this.handleResponseError(response);
+        }
       } catch (error) {
-        console.error("Error deleting repos:", error);
+        this.handleAxiosError(error, 'Error deleting migration config');      
       }
 
       window.location.reload();
-    },    
+    },
+    handleAxiosError(error, defaultMessage) {
+      if (error.response) {
+        this.alertMessage = `${defaultMessage}: ${error.response.status} ${error.response.data.message || error.response.statusText}`;
+      } else {
+        this.alertMessage = `${defaultMessage}: ${error.message}`;
+      }
+      this.showAlert = true;
+    },
+    handleResponseError(response) {
+      this.alertMessage = `Error: ${response.status} ${response.statusText}`;
+      this.showAlert = true;
+    },     
+    closeAlert() {
+      this.showAlert = false;
+      this.alertMessage = '';
+    }, 
   },
   mounted() {
     this.fetchRepos();

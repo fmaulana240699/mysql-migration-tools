@@ -1,5 +1,9 @@
 <template>
 <div class="container">
+  <div v-if="showAlert" class="alert">
+    <span class="closebtn" @click="closeAlert">&times;</span> 
+    <strong>Oops!</strong> {{ alertMessage }}
+  </div>
   <div class="dropdown" @click="toggleDropdown">
       <button class="dropbtn">Export Data</button>
       <div :class="{ 'dropdown-content': true, 'show': showDropdown }" id="myDropdown">
@@ -63,7 +67,9 @@ export default {
       migrations: [],
       nextPage: null,
       prevPage: null,
-      showDropdown: false
+      showDropdown: false,
+      showAlert: false,
+      alertMessage: '',
     };
   },
   mounted() {
@@ -78,7 +84,7 @@ export default {
         this.prevPage = response.data.previous;
         console.log(this.migrations.db_name);
       } catch (error) {
-        console.error('Error fetching items:', error);
+        this.handleError(error, 'Error fetching items');
       }
     },
     async detailsPage(migrationId) {
@@ -111,8 +117,20 @@ export default {
         // Release the URL object
         window.URL.revokeObjectURL(url);
       } catch (error) {
-        console.error('Error exporting PDF:', error);
+        this.handleError(error, 'Error exporting PDF');
       }
+    },
+    handleError(error, customMessage) {
+      if (error.response) {
+        this.alertMessage = `${customMessage}: ${error.response.status} ${error.response.data.message || error.response.statusText}`;
+      } else {
+        this.alertMessage = `${customMessage}: ${error.message}`;
+      }
+      this.showAlert = true;
+    },
+    closeAlert() {
+      this.showAlert = false;
+      this.alertMessage = '';
     }
   },
 };

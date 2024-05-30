@@ -15,11 +15,12 @@ Frontend
 - styling form edit all (done)
 - edit migration config pake repo name (done)
 - export pdf > ada pilihan berapa lama, sehari, seminggu & sebulan (done)
-- redirect after edit repo and migrate config (done)
+- redirect after edit repo and migrate config (done) 
+- alert (done)
+- add user redirect (done)
 
 todo: 
-- alert
-- add user redirect
+
 
 
 Backend
@@ -51,10 +52,10 @@ Backend
 - sesuain table tipe data sama max limit (done)
 - relation jadi username instead of id (done)
 - branch param (done)
+- migration version check, schema format ganti jadi "2024-02-18-001" (done)
 
 todo:
-- migration version check
-schema format ganti jadi "2024-02-18-001"
+
 
 
 RekeningkuDev/trading-engine
@@ -62,6 +63,3 @@ trading-engine/pro/trade/pkg/mysql/migration
 rekeningku_main
 10.20.0.16
 r3keningku
-
-
-user edit

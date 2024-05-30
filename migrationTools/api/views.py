@@ -164,7 +164,7 @@ class WebhookAPIView(generics.ListAPIView):
                 # put on celery to for the query to be executed
                 for p in query:
                     history_id = migrationData.objects.create(sql_query=p["query"], status_query="in queue", db_name=migration.db_name, engineer_name=author, error_log=None, file_name=str(self.filter_file_name(p["file_loc"])), id_repo=repo_integration_instance)
-                    execute_remote_query.delay(p["query"], identifier, history_id.id, "/" + str(self.filter_file_name(p["file_loc"])))
+                    execute_remote_query.delay(p["query"], identifier, history_id.id, str(self.filter_batch(p["file_loc"])))
                 
                 test.clear()
                 self.not_yet.clear()
@@ -342,9 +342,13 @@ class ExportHistory(APIView):
         # Convert JSON data to a Python dictionary
         data_dict = json.loads(json_data)
 
+        start_date_str = start_date.strftime('%Y-%m-%d')
+        end_date_str = end_date.strftime('%Y-%m-%d')
+
         # Prepare data for the template
         context = {
             'data': data_dict,
+            'time_range_label': f'{start_date_str} to {end_date_str}',
         }
 
         # Render the HTML template to a PDF

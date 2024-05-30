@@ -1,5 +1,9 @@
 <template>
-    <div class="container">
+        <div class="container">
+          <div v-if="showAlert" class="alert">
+          <span class="closebtn" @click="closeAlert">&times;</span> 
+          <strong>Oops!</strong> {{ alertMessage }}
+        </div>      
         <a href="/users/create"><button class="button-84"> Add New User </button></a>
         <table>
           <thead>
@@ -43,6 +47,8 @@
     return {
       selectedUserId: null,
       users: [],
+      showAlert: false,
+      alertMessage: '',        
     };
   },
   methods: {
@@ -52,6 +58,8 @@
         this.users = response.data
       } catch (error) {
         console.error("Error fetching users:", error);
+        this.alertMessage = 'Error fetching users data: ' + error.message;
+        this.showAlert = true;           
       }
     },
     editUser(userId) {
@@ -60,12 +68,33 @@
     async deleteUser(userId) {
       try {
         const response = await axiosInstance.delete(`/users/delete/`, {data: {"id": userId}});
+        if (response.status === 200) {
+          await this.fetchUsers();
+        } else {
+          this.handleResponseError(response);
+        }
       } catch (error) {
-        console.error("Error deleting users:", error);
+        this.handleAxiosError(error, 'Error deleting user');        
       }
 
       window.location.reload();
     },
+    handleAxiosError(error, defaultMessage) {
+      if (error.response) {
+        this.alertMessage = `${defaultMessage}: ${error.response.status} ${error.response.data.message || error.response.statusText}`;
+      } else {
+        this.alertMessage = `${defaultMessage}: ${error.message}`;
+      }
+      this.showAlert = true;
+    },
+    handleResponseError(response) {
+      this.alertMessage = `Error: ${response.status} ${response.statusText}`;
+      this.showAlert = true;
+    },
+    closeAlert() {
+      this.showAlert = false;
+      this.alertMessage = '';
+    }, 
   },
   mounted() {
     this.fetchUsers();

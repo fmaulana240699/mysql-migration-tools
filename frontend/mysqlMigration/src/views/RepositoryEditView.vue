@@ -2,6 +2,11 @@
   <div class="form-mid">
     <h1>Update Repo Integration</h1>
     
+    <div v-if="showAlert" class="alert">
+      <span class="closebtn" @click="closeAlert">&times;</span>
+      <strong>Oops!</strong> {{ alertMessage }}
+    </div>
+
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
         <label for="name">Name:</label>
@@ -37,7 +42,6 @@
 import axiosInstance from '@/config/axiosConfig';
 
 export default {
- 
   name: 'FormComponent',
 
   props: {
@@ -55,31 +59,44 @@ export default {
         token: '',
         repo_url: ''
       },
+      showAlert: false,
+      alertMessage: ''
     };
   },
   methods: {
     async handleSubmit() {
-        try {
-          const response = await axiosInstance.patch(`/repo/${this.repoId}/`, this.formData);
-          console.log('Form submitted:', response.data);
-          window.location.href = `/repository`;
-        } catch (error) {
-          console.error('Error submitting form:', error);
-        }
+      try {
+        const response = await axiosInstance.patch(`/repo/${this.repoId}/`, this.formData);
+        console.log('Form submitted:', response.data);
+        window.location.href = `/repository`;
+      } catch (error) {
+        this.handleError(error, 'Error submitting form');
+      }
     },
     async fetchData() {
       try {
         const response = await axiosInstance.get(`/repo/${this.repoId}/`);
-        this.formData = response.data
-
+        this.formData = response.data;
       } catch (error) {
-        console.error("Error fetching data:", error);
+        this.handleError(error, 'Error fetching data');
       }
     },
+    handleError(error, customMessage) {
+      if (error.response) {
+        this.alertMessage = `${customMessage}: ${error.response.status} ${error.response.data.message || error.response.statusText}`;
+      } else {
+        this.alertMessage = `${customMessage}: ${error.message}`;
+      }
+      this.showAlert = true;
+    },
+    closeAlert() {
+      this.showAlert = false;
+      this.alertMessage = '';
+    }
   },
   mounted() {
     this.fetchData();
-  },   
+  },
 };
 </script>
 
@@ -91,5 +108,28 @@ export default {
 label {
   display: block;
   margin-bottom: 5px;
+}
+
+.alert {
+  padding: 20px;
+  background-color: #f44336;
+  color: white;
+  margin-top: 20px;
+  border-radius: 5px;
+  position: relative;
+}
+
+.closebtn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.closebtn:hover {
+  color: black;
 }
 </style>

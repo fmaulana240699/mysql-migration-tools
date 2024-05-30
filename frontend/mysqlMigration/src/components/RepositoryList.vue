@@ -1,5 +1,9 @@
 <template>
 <div class="container">
+      <div v-if="showAlert" class="alert">
+        <span class="closebtn" @click="closeAlert">&times;</span> 
+        <strong>Oops!</strong> {{ alertMessage }}
+      </div>
     <a href="/repository/create"><button class="button-84"> Add New Repo </button></a>
     <table>
       <thead>
@@ -47,15 +51,19 @@ export default {
     return {
       selectedRepoId: null,
       repos: [],
+      showAlert: false,
+      alertMessage: '',
     };
   },
   methods: {
     async fetchRepos() {
       try {
         const response = await axiosInstance.get(`/repo/`);
-        this.repos = response.data
+        this.repos = response.data;
       } catch (error) {
         console.error("Error fetching repos:", error);
+        this.alertMessage = 'Error fetching repositories: ' + error.message;
+        this.showAlert = true;
       }
     },
     editRepo(repoId) {
@@ -64,11 +72,32 @@ export default {
     async deleteRepo(repoId) {
       try {
         const response = await axiosInstance.delete(`/repo/delete/`, {data: {"id": repoId}});
+        if (response.status === 200) {
+          await this.fetchRepos();
+        } else {
+          this.handleResponseError(response);
+        }
       } catch (error) {
-        console.error("Error deleting repos:", error);
+          this.handleAxiosError(error, 'Error deleting repository');
       }
 
       window.location.reload();
+    },
+    handleAxiosError(error, defaultMessage) {
+      if (error.response) {
+        this.alertMessage = `${defaultMessage}: ${error.response.status} ${error.response.data.message || error.response.statusText}`;
+      } else {
+        this.alertMessage = `${defaultMessage}: ${error.message}`;
+      }
+      this.showAlert = true;
+    },
+    handleResponseError(response) {
+      this.alertMessage = `Error: ${response.status} ${response.statusText}`;
+      this.showAlert = true;
+    },    
+    closeAlert() {
+      this.showAlert = false;
+      this.alertMessage = '';
     },
   },
   mounted() {

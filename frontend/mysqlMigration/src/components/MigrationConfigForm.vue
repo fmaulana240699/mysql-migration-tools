@@ -1,6 +1,11 @@
 <template>
     <div class="form-mid">
       <h1>Add New Migration Config</h1>
+
+      <div v-if="showAlert" class="alert">
+        <span class="closebtn" @click="closeAlert">&times;</span> 
+        <strong>Oops!</strong> {{ alertMessage }}
+      </div>
       
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
@@ -59,12 +64,17 @@ export default {
       author: author
     });
 
+    const showAlert = ref(false);
+    const alertMessage = ref('');
+
     const fetchRepos = async () => {
       try {
         const response = await axiosInstance.get(`/repo/`);
         repoList.value = response.data;
       } catch (error) {
         console.error("Error fetching repos:", error);
+        alertMessage.value = 'Error fetching repos: ' + error.message;
+        showAlert.value = true;
       }
     };
 
@@ -72,10 +82,15 @@ export default {
       if (validateForm()) {
         try {
           const response = await axiosInstance.post(`/migration/config/`, formData.value);
-          console.log('Form submitted:', response.data);
-          window.location.href = '/migrations/config';
+          if (response.status === 200) {
+            // console.log('Form submitted:', response.data);
+            window.location.href = '/migrations/config';
+          } else {
+            handleResponseError(response);
+          }
         } catch (error) {
           console.error('Error submitting form:', error);
+          handleAxiosError(error);
         }
       } else {
         alert('Please fill in all fields.');
@@ -93,6 +108,25 @@ export default {
       );
     };
 
+    const handleAxiosError = (error) => {
+      if (error.response) {
+        alertMessage.value = `Error submitting form: ${error.response.status} ${error.response.data.message || error.response.statusText}`;
+      } else {
+        alertMessage.value = `Error submitting form: ${error.message}`;
+      }
+      showAlert.value = true;
+      };
+
+    const handleResponseError = (response) => {
+      alertMessage.value = `Error: ${response.status} ${response.statusText}`;
+      showAlert.value = true;
+    };    
+
+    const closeAlert = () => {
+        showAlert.value = false;
+        alertMessage.value = '';
+    };    
+
     onMounted(() => {
       fetchRepos();  // Fetch repos when the component is mounted
     });
@@ -101,6 +135,9 @@ export default {
       formData,
       repoList,
       handleSubmit,
+      showAlert,
+      alertMessage,        
+      closeAlert,
     };
   },
 };

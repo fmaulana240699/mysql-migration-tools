@@ -2,6 +2,11 @@
   <div class="form-mid">
     <h1>Update Migration Config</h1>
     
+    <div v-if="showAlert" class="alert">
+      <span class="closebtn" @click="closeAlert">&times;</span>
+      <strong>Oops!</strong> {{ alertMessage }}
+    </div>
+
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
         <label for="folder_location">Folder Location :</label>
@@ -61,45 +66,57 @@ export default {
         name: '',
         id_repo: ''
       },
-      repoList: ''
+      repoList: '',
+      showAlert: false,
+      alertMessage: ''
     };
   },
   methods: {
     async handleSubmit() {
-        try {
-          if (!this.formData.db_password) {
-            delete this.formData.db_password;
-          }
-          const response = await axiosInstance.patch(`/migration/config/${this.configId}/`, this.formData);
-          window.location.href = `/migrations/config`;
-        } catch (error) {
-          console.error('Error submitting form:', error);
+      try {
+        if (!this.formData.db_password) {
+          delete this.formData.db_password;
         }
+        const response = await axiosInstance.patch(`/migration/config/${this.configId}/`, this.formData);
+        window.location.href = `/migrations/config`;
+      } catch (error) {
+        this.handleError(error, 'Error submitting form');
+      }
     },
     async fetchData() {
       try {
         const response = await axiosInstance.get(`/migration/config/${this.configId}`);
         this.formData = response.data;
       } catch (error) {
-        console.error("Error fetching data:", error);
+        this.handleError(error, 'Error fetching data');
       }
     },
-    async fetchRepos () {
+    async fetchRepos() {
       try {
         const response = await axiosInstance.get(`/repo/${this.formData.id_repo}`);
         this.repoList = response.data;
-        // console.log(this.repoList[0]["name"]);
       } catch (error) {
-        console.error("Error fetching repos:", error);
+        this.handleError(error, 'Error fetching repos');
       }
     },
-    
+    handleError(error, customMessage) {
+      if (error.response) {
+        this.alertMessage = `${customMessage}: ${error.response.status} ${error.response.data.message || error.response.statusText}`;
+      } else {
+        this.alertMessage = `${customMessage}: ${error.message}`;
+      }
+      this.showAlert = true;
+    },
+    closeAlert() {
+      this.showAlert = false;
+      this.alertMessage = '';
+    }
   },
   mounted() {
     this.fetchData();
     this.fetchRepos();
   },
-};  
+};
 </script>
 
 <style>
@@ -110,5 +127,28 @@ export default {
 label {
   display: block;
   margin-bottom: 5px;
+}
+
+.alert {
+  padding: 20px;
+  background-color: #f44336;
+  color: white;
+  margin-top: 20px;
+  border-radius: 5px;
+  position: relative;
+}
+
+.closebtn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.closebtn:hover {
+  color: black;
 }
 </style>
