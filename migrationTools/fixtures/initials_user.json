@@ -1,0 +1,28 @@
+[
+    {
+        "model": "api.Users",
+        "pk": "RK001",
+        "fields": {
+            "email": "admin@reku.id",
+            "first_name": "Admin",
+            "username": "admin",
+            "password": "pbkdf2_sha256$720000$njtKNFwaawhRPRDjCdXMDa$QoVsYf0KR3GYBopcbEmj/LxFuTb8W0dI2f/2EYD7V3I=",
+            "role": "Admin",
+            "is_active": true,
+            "is_staff": false
+        }
+    },
+    {
+        "model": "api.Users",
+        "pk": "RK002",
+        "fields": {
+            "email": "viewer@reku.id",
+            "first_name": "Viewer",
+            "role": "Viewer",
+            "username": "viewer",
+            "password": "pbkdf2_sha256$720000$njtKNFwaawhRPRDjCdXMDa$QoVsYf0KR3GYBopcbEmj/LxFuTb8W0dI2f/2EYD7V3I=",
+            "is_active": true,
+            "is_staff": false
+        }
+    }
+]

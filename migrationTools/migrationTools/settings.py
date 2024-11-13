@@ -41,8 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'rest_framework_simplejwt',  
-    'rest_framework_simplejwt.token_blacklist',  
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'api'
 ]
 
@@ -132,7 +132,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 
 AUTH_USER_MODEL = 'api.Users'
 AUTH_TOKEN_MODEL = 'api.Users'
@@ -156,7 +156,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME', 'appmig'),
-        'USER': os.environ.get('DB_USER', 'fmaulana'),
+        'USER': os.environ.get('DB_USER', 'cris'),
         'PASSWORD': os.environ.get('DB_PASSWORD', 'jaringan'),
         'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
         'PORT': os.environ.get('DB_PORT', '3306'),

@@ -1,0 +1,98 @@
+version: '3'
+
+services:
+  # MySQL container
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: jaringan
+      MYSQL_DATABASE: appmig
+      MYSQL_USER: cris
+      MYSQL_PASSWORD: jaringan
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # Redis container
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  # Django container
+  django:
+    build: ./migrationTools
+    container_name: django_rest
+    restart: always
+    command: >
+      sh -c "sleep 30 && python manage.py migrate && python manage.py loaddata fixtures/initials_user.json && python manage.py runserver 0.0.0.0:8000"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: cris
+      DB_PASSWORD: jaringan
+      DB_DB: appmig
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./migrationTools:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+      - redis
+
+  django_worker:
+    build: ./migrationTools
+    container_name: django_worker
+    restart: always
+    command: "celery -A migrationTools worker --loglevel=info"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: cris
+      DB_PASSWORD: jaringan
+      DB_DB: appmig
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./migrationTools:/app
+    depends_on:
+      - mysql
+      - redis
+
+  # Vue.js container
+  vue:
+    build: ./frontend/mysqlMigration/
+    container_name: vue_app
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend/mysqlMigration/:/app
+    environment:
+      VUE_APP_API_URL: http://localhost:8000
+
+  # Caddy container for reverse proxy
+  caddy:
+    image: caddy:latest
+    container_name: caddy_proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - vue
+      - django
+
+volumes:
+  mysql_data:
+  caddy_data:
+  caddy_config:

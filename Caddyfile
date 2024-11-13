@@ -1,0 +1,3 @@
+dbm.rekeningku.net {
+    reverse_proxy * vue_app:80
+}
