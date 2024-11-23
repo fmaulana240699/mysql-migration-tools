@@ -1,7 +1,7 @@
 <template>
 <div class="container">
       <div v-if="showAlert" class="alert">
-        <span class="closebtn" @click="closeAlert">&times;</span> 
+        <span class="closebtn" @click="closeAlert">&times;</span>
         <strong>Oops!</strong> {{ alertMessage }}
       </div>
     <a href="/repository/create"><button class="button-84"> Add New Repo </button></a>
@@ -18,6 +18,9 @@
         </tr>
       </thead>
       <tbody>
+        <tr v-if="repos.length === 0">
+          <td colspan="8" style="text-align: center;">No data available</td>
+        </tr>
         <tr v-for="repo in repos" :key="repo.id">
             <td> {{ repo.id }} </td>
             <td> {{ repo.name }} </td>
@@ -70,18 +73,29 @@ export default {
       this.$router.push({ name: 'repositoryEdit', params: { repoId } });
     },
     async deleteRepo(repoId) {
-      try {
-        const response = await axiosInstance.delete(`/repo/delete/`, {data: {"id": repoId}});
-        if (response.status === 200) {
-          await this.fetchRepos();
-        } else {
-          this.handleResponseError(response);
+      this.$swal({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const response = await axiosInstance.delete(`/repo/delete/`, { data: { id: repoId } });
+            if (response.status === 200 | response.status === 204) {
+              this.$swal('Deleted!', 'Repository file has been deleted.', 'success');
+              await this.fetchRepos();
+            } else {
+              this.handleResponseError(response);
+            }
+          } catch (error) {
+            this.handleAxiosError(error, 'Error deleting repository');
+          }
         }
-      } catch (error) {
-          this.handleAxiosError(error, 'Error deleting repository');
-      }
-
-      window.location.reload();
+      });
     },
     handleAxiosError(error, defaultMessage) {
       if (error.response) {
@@ -94,7 +108,7 @@ export default {
     handleResponseError(response) {
       this.alertMessage = `Error: ${response.status} ${response.statusText}`;
       this.showAlert = true;
-    },    
+    },
     closeAlert() {
       this.showAlert = false;
       this.alertMessage = '';
@@ -102,7 +116,7 @@ export default {
   },
   mounted() {
     this.fetchRepos();
-  },  
+  },
   name: 'TableComponent',
 };
 </script>

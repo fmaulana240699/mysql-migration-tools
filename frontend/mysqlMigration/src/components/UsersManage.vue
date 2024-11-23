@@ -1,9 +1,9 @@
 <template>
         <div class="container">
           <div v-if="showAlert" class="alert">
-          <span class="closebtn" @click="closeAlert">&times;</span> 
+          <span class="closebtn" @click="closeAlert">&times;</span>
           <strong>Oops!</strong> {{ alertMessage }}
-        </div>      
+        </div>
         <a href="/users/create"><button class="button-84"> Add New User </button></a>
         <table>
           <thead>
@@ -37,18 +37,18 @@
         </table>
       </div>
     </template>
-    
+
   <script>
   import axiosInstance from '@/config/axiosConfig';
-    
-    
+
+
   export default {
   data() {
     return {
       selectedUserId: null,
       users: [],
       showAlert: false,
-      alertMessage: '',        
+      alertMessage: '',
     };
   },
   methods: {
@@ -59,25 +59,36 @@
       } catch (error) {
         console.error("Error fetching users:", error);
         this.alertMessage = 'Error fetching users data: ' + error.message;
-        this.showAlert = true;           
+        this.showAlert = true;
       }
     },
     editUser(userId) {
       this.$router.push({ name: 'usersEdit', params: { userId } });
     },
-    async deleteUser(userId) {
-      try {
-        const response = await axiosInstance.delete(`/users/delete/`, {data: {"id": userId}});
-        if (response.status === 200) {
-          await this.fetchUsers();
-        } else {
-          this.handleResponseError(response);
+    async deleteUser(userId){
+      this.$swal({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const response = await axiosInstance.delete(`/users/delete/`, {data: {"id": userId}});
+            if (response.status === 200 | response.status === 204) {
+              this.$swal('Deleted!', 'Repository file has been deleted.', 'success');
+              await this.fetchUsers();
+            } else {
+              this.handleResponseError(response);
+            }
+          } catch (error) {
+            this.handleAxiosError(error, 'Error deleting repository');
+          }
         }
-      } catch (error) {
-        this.handleAxiosError(error, 'Error deleting user');        
-      }
-
-      window.location.reload();
+      });
     },
     handleAxiosError(error, defaultMessage) {
       if (error.response) {
@@ -94,11 +105,11 @@
     closeAlert() {
       this.showAlert = false;
       this.alertMessage = '';
-    }, 
+    },
   },
   mounted() {
     this.fetchUsers();
-  },  
+  },
   name: 'TableComponent',
 };
 </script>

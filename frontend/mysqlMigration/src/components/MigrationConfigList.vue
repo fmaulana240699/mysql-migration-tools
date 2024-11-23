@@ -1,7 +1,7 @@
 <template>
 <div class="container">
     <div v-if="showAlert" class="alert">
-      <span class="closebtn" @click="closeAlert">&times;</span> 
+      <span class="closebtn" @click="closeAlert">&times;</span>
       <strong>Oops!</strong> {{ alertMessage }}
     </div>
     <a class="testing" href="/migrations/config/create"><button class="button-84"> Add New Migration Config </button></a>
@@ -20,6 +20,9 @@
         </tr>
       </thead>
       <tbody>
+        <tr v-if="migrations.length === 0">
+          <td colspan="10" style="text-align: center;">No data available</td>
+        </tr>
         <tr v-for="migration_config in migrations" :key="migration_config.id">
             <td> {{ migration_config.id }} </td>
             <td> {{ migration_config.folder_location }} </td>
@@ -39,7 +42,7 @@
                  <path d="M4 7H20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                  <path d="M6 10V18C6 19.6569 7.34315 21 9 21H15C16.6569 21 18 19.6569 18 18V10" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                  <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                 </svg> </button></td>            
+                 </svg> </button></td>
         </tr>
       </tbody>
     </table>
@@ -57,7 +60,7 @@ export default {
       selectedConfigId: null,
       migrations: [],
       showAlert: false,
-      alertMessage: '',      
+      alertMessage: '',
     };
   },
   methods: {
@@ -68,25 +71,36 @@ export default {
       } catch (error) {
         console.error("Error fetching migration config:", error);
         this.alertMessage = 'Error fetching migration config: ' + error.message;
-        this.showAlert = true;        
+        this.showAlert = true;
       }
     },
     editMigrationConfig(configId) {
       this.$router.push({ name: 'migrationsConfigEdit', params: { configId } });
     },
-    async deleteMigrationConfig(configId) {
-      try {
-        const response = await axiosInstance.delete(`/migration/config/delete/`, {data: {"id": configId}});
-        if (response.status === 200) {
-          await this.fetchRepos();
-        } else {
-          this.handleResponseError(response);
+    async deleteMigrationConfig(configId){
+      this.$swal({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const response = await axiosInstance.delete(`/migration/config/delete/`, {data: {"id": configId}});
+            if (response.status === 200 | response.status === 204) {
+              this.$swal('Deleted!', 'Migration config has been deleted.', 'success');
+              await this.fetchRepos();
+            } else {
+              this.handleResponseError(response);
+            }
+          } catch (error) {
+            this.handleAxiosError(error, 'Error deleting migration config');
+          }
         }
-      } catch (error) {
-        this.handleAxiosError(error, 'Error deleting migration config');      
-      }
-
-      window.location.reload();
+      });
     },
     handleAxiosError(error, defaultMessage) {
       if (error.response) {
@@ -99,14 +113,14 @@ export default {
     handleResponseError(response) {
       this.alertMessage = `Error: ${response.status} ${response.statusText}`;
       this.showAlert = true;
-    },     
+    },
     closeAlert() {
       this.showAlert = false;
       this.alertMessage = '';
-    }, 
+    },
   },
   mounted() {
     this.fetchRepos();
-  },    
+  },
 };
 </script>

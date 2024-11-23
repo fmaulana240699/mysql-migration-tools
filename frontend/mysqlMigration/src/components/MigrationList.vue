@@ -1,7 +1,7 @@
 <template>
 <div class="container">
   <div v-if="showAlert" class="alert">
-    <span class="closebtn" @click="closeAlert">&times;</span> 
+    <span class="closebtn" @click="closeAlert">&times;</span>
     <strong>Oops!</strong> {{ alertMessage }}
   </div>
   <div class="dropdown" @click="toggleDropdown">
@@ -11,7 +11,7 @@
         <a @click="exportPDF('1_week')">1 Week</a>
         <a @click="exportPDF('1_month')">1 Month</a>
       </div>
-  </div> 
+  </div>
     <table class="scrollable-table" ref="migrationHistory">
       <thead>
         <tr>
@@ -27,6 +27,9 @@
         </tr>
       </thead>
       <tbody>
+        <tr v-if="migrations.length === 0">
+          <td colspan="10" style="text-align: center;">No data available</td>
+        </tr>
         <tr v-for="migration in migrations" :key="migration.id">
             <td> {{ migration.id }} </td>
             <td> {{ migration.engineer_name }} </td>
@@ -36,7 +39,7 @@
             <td> {{ migration.db_name }} </td>
             <td> {{ migration.created_at }} </td>
             <td> {{ migration.updated_at }} </td>
-            <td> <button @click="detailsPage(migration.id)"> <svg fill="#000000" height="40px" width="40px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+            <td> <button @click="detailsPage(migration.id)"> <svg fill="#000000" height="40px" width="40px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
 	 viewBox="0 0 57.945 57.945" xml:space="preserve">
 <g>
 	<path d="M57.655,27.873c-7.613-7.674-17.758-11.9-28.568-11.9c-0.026,0-0.051,0.002-0.077,0.002c-0.013,0-0.025-0.002-0.037-0.002
@@ -203,5 +206,5 @@ export default {
 .dropdown-content a:hover {background-color: #ddd;}
 
 /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
-.show {display:block;} 
+.show {display:block;}
 </style>
