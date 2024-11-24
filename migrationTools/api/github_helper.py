@@ -4,8 +4,8 @@ from github import Github
 
 class githubHelper():
     def __init__(self, repo_name, file_location, branch, github_token=None):
-        self.github_token = github_token
-        self.repo_name = repo_name
+        self.github_token =  github_token
+        self.repo_name =  repo_name
         self.file_location = file_location
         self.branch = branch
 
@@ -24,8 +24,8 @@ class githubHelper():
             return last_commit.commit.author.name
         except Exception as e:
             print("An error occurred:", e)
-            return e      
-    
+            return e
+
     def compare_migration(self):
         g = Github(self.github_token)
         repo = g.get_repo(self.repo_name)
@@ -45,6 +45,5 @@ class githubHelper():
             print("An error occurred:", e)
             return e
 
-# instance = githubHelper("fmaulana240699/mysql-migration-tools", "migrations-data")
-# print(instance.get_last_commit_author())
+
 

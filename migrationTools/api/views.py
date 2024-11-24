@@ -116,9 +116,9 @@ class WebhookAPIView(generics.ListAPIView):
     not_yet = []
 
     def filter_file_name(self, string):
-        # match = re.search(r'[^/]+$', string)
-        match = re.sub(r'/$', '', string)
-        return match.group(0)
+        if string.endswith('/'):
+            return string.rstrip('/').split('/')[-1]
+        return string.split('/')[-1]
 
     def filter_batch(self, string):
         pattern = r"/(\d{4}-\d{2}-\d{2}-\d{3})-"
@@ -134,12 +134,13 @@ class WebhookAPIView(generics.ListAPIView):
         migration = migrationConfig.objects.get(id_repo=identifier)
         repo = repoIntegration.objects.get(pk=identifier)
         repo.decrypt()
+        print(migration.folder_location)
         gh = githubHelper(repo.repo_url, migration.folder_location, repo.branch, repo.token)
         list_file = gh.get_list_file()
         author = gh.get_last_commit_author()
         # print(list_file)
-        for x in list_file:
-            print(str(self.filter_file_name(x)))
+        # for x in list_file:
+        #     print(str(self.filter_file_name(x)))
         # print("testing")
         # for y in dict.data:
         #     print(y["file_name"])
