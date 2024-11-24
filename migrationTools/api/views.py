@@ -26,13 +26,13 @@ from django.utils import timezone
 
 class repoCreateListAPIView(generics.ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated & IsAdmin]  
+    permission_classes = [IsAuthenticated & IsAdmin]
     queryset = repoIntegration.objects.all()
-    serializer_class = repoIntegrationSerializer  
+    serializer_class = repoIntegrationSerializer
 
 class RepoDeleteView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated & IsAdmin]  
+    permission_classes = [IsAuthenticated & IsAdmin]
 
     def delete(self, request):
         repo_id = request.data.get('id')
@@ -41,11 +41,11 @@ class RepoDeleteView(APIView):
             repo.delete()
             return Response({'message': 'Repository berhasil dihapus'}, status=204)
         except repoIntegration.DoesNotExist:
-            return Response({'message': 'Repository tidak ditemukan'}, status=404)    
-        
+            return Response({'message': 'Repository tidak ditemukan'}, status=404)
+
 class RepoUpdateView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated & IsAdmin]  
+    permission_classes = [IsAuthenticated & IsAdmin]
 
     def get(self, request, identifier):
         try:
@@ -53,7 +53,7 @@ class RepoUpdateView(APIView):
             repo = model_to_dict(repo)
             return Response(repo, status=200)
         except repoIntegration.DoesNotExist:
-            return Response({'message': 'Repository tidak ditemukan'}, status=404)   
+            return Response({'message': 'Repository tidak ditemukan'}, status=404)
 
     def patch(self, request, identifier):
         try:
@@ -64,17 +64,17 @@ class RepoUpdateView(APIView):
                 return Response(serializer.data, status=200)
             return Response(serializer.errors, status=400)
         except repoIntegration.DoesNotExist:
-            return Response({'message': 'Repository tidak ditemukan'}, status=404)        
+            return Response({'message': 'Repository tidak ditemukan'}, status=404)
 
 class migrationConfigCreateListAPIView(generics.ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated & IsAdmin]      
+    permission_classes = [IsAuthenticated & IsAdmin]
     queryset = migrationConfig.objects.all()
     serializer_class = migrationConfigSerializer
 
 class MigrationConfigDeleteView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated & IsAdmin]  
+    permission_classes = [IsAuthenticated & IsAdmin]
 
     def delete(self, request):
         migration_id = request.data.get('id')
@@ -96,7 +96,7 @@ class MigrationConfigUpdateView(APIView):
             migration = model_to_dict(migration)
             return Response(migration, status=200)
         except migrationConfig.DoesNotExist:
-            return Response({'message': 'Migration tidak ditemukan'}, status=404)     
+            return Response({'message': 'Migration tidak ditemukan'}, status=404)
 
     def patch(self, request, identifier):
         try:
@@ -107,7 +107,7 @@ class MigrationConfigUpdateView(APIView):
                 return Response(serializer.data, status=200)
             return Response(serializer.errors, status=400)
         except migrationConfig.DoesNotExist:
-            return Response({'message': 'Migration config tidak ditemukan'}, status=404)        
+            return Response({'message': 'Migration config tidak ditemukan'}, status=404)
 
 
 class WebhookAPIView(generics.ListAPIView):
@@ -116,8 +116,9 @@ class WebhookAPIView(generics.ListAPIView):
     not_yet = []
 
     def filter_file_name(self, string):
-        match = re.search(r'[^/]+$', string)
-        return match.group(0)   
+        # match = re.search(r'[^/]+$', string)
+        match = re.sub(r'/$', '', string)
+        return match.group(0)
 
     def filter_batch(self, string):
         pattern = r"/(\d{4}-\d{2}-\d{2}-\d{3})-"
@@ -126,7 +127,7 @@ class WebhookAPIView(generics.ListAPIView):
         return match.group(1)
 
     def post(self, request, identifier):
-        
+
         ### compare last migration ###
         last_migrate = self.queryset.filter(id_repo=identifier)
         dict = self.serializer_class(last_migrate, many=True)
@@ -136,11 +137,12 @@ class WebhookAPIView(generics.ListAPIView):
         gh = githubHelper(repo.repo_url, migration.folder_location, repo.branch, repo.token)
         list_file = gh.get_list_file()
         author = gh.get_last_commit_author()
-        # for x in list_file:
-        #     print(str(self.filter_file_name(x)))
+        # print(list_file)
+        for x in list_file:
+            print(str(self.filter_file_name(x)))
         # print("testing")
-        for y in dict.data:
-            print(y["file_name"])
+        # for y in dict.data:
+        #     print(y["file_name"])
 
         for file_name in list_file:
             found = False
@@ -149,23 +151,23 @@ class WebhookAPIView(generics.ListAPIView):
                     found = True
                     pass
             if not found:
-                self.not_yet.append(file_name)        
-        print(len(self.not_yet))    
+                self.not_yet.append(file_name)
+        print(len(self.not_yet))
         test = list(set(self.not_yet))
 
-        if len(test) != 0: 
+        if len(test) != 0:
             try:
                 query = []
                 for z in test:
                     query.append({"query": gh.get_migration(z), "file_loc": z})
-                
+
                 repo_integration_instance = repoIntegration.objects.get(pk=identifier)
 
                 # put on celery to for the query to be executed
                 for p in query:
                     history_id = migrationData.objects.create(sql_query=p["query"], status_query="in queue", db_name=migration.db_name, engineer_name=author, error_log=None, file_name=str(self.filter_file_name(p["file_loc"])), id_repo=repo_integration_instance)
                     execute_remote_query.delay(p["query"], identifier, history_id.id, str(self.filter_batch(p["file_loc"])))
-                
+
                 test.clear()
                 self.not_yet.clear()
             except Exception as e:
@@ -173,10 +175,10 @@ class WebhookAPIView(generics.ListAPIView):
                 return Response("error", status=400)
         else:
             print("skip gan")
-        
+
         return Response("successfully in queue", status=200)
-        
-       
+
+
 class HistoryPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
@@ -184,7 +186,7 @@ class HistoryPagination(PageNumberPagination):
 
 class MigrationHistoryListView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated & (IsAdmin | IsViewer)]  
+    permission_classes = [IsAuthenticated & (IsAdmin | IsViewer)]
     pagination_class = HistoryPagination
 
     def get(self, request):
@@ -197,23 +199,23 @@ class MigrationHistoryListView(APIView):
 
         serializer = migrationDataSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
-    
+
 class MigrationHistoryListDetailsView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated & (IsAdmin | IsViewer)]  
+    permission_classes = [IsAuthenticated & (IsAdmin | IsViewer)]
 
     def get(self, request, identifier):
 
-        try: 
+        try:
             data = migrationData.objects.filter(id=identifier).first()
 
             return Response({
-                "id": data.id, 
+                "id": data.id,
                 "sql_query": data.sql_query
             }, status=200)
         except Exception as e:
-            return Response(status=404)   
-    
+            return Response(status=404)
+
 class RegisterView(generics.CreateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated & IsAdmin]
@@ -248,7 +250,7 @@ class LoginView(generics.GenericAPIView):
 
 class LogoutView(generics.GenericAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated & (IsAdmin | IsViewer)]  
+    permission_classes = [IsAuthenticated & (IsAdmin | IsViewer)]
 
     def post(self, request, *args, **kwargs):
         try:
@@ -257,7 +259,7 @@ class LogoutView(generics.GenericAPIView):
             token.blacklist()
             return Response(status=205)
         except Exception as e:
-            return Response(status=400)       
+            return Response(status=400)
 
 
 class UserDeleteView(APIView):
@@ -284,7 +286,7 @@ class UserUpdateView(APIView):
             user = model_to_dict(user)
             return Response(user, status=200)
         except Users.DoesNotExist:
-            return Response({'message': 'User tidak ditemukan'}, status=404)     
+            return Response({'message': 'User tidak ditemukan'}, status=404)
 
     def patch(self, request, pk):
         try:
@@ -298,17 +300,17 @@ class UserUpdateView(APIView):
                 return Response(serializer.data, status=200)
             return Response(serializer.errors, status=400)
         except Users.DoesNotExist:
-            return Response({'message': 'User tidak ditemukan'}, status=404) 
-        
+            return Response({'message': 'User tidak ditemukan'}, status=404)
+
 class UserListView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated & IsAdmin]      
+    permission_classes = [IsAuthenticated & IsAdmin]
     queryset = Users.objects.all()
     serializer_class = UserSerializer
 
 class ExportHistory(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated & (IsAdmin | IsViewer)]  
+    permission_classes = [IsAuthenticated & (IsAdmin | IsViewer)]
 
     def render_to_pdf(self, template_src, context_dict):
         template = get_template(template_src)
