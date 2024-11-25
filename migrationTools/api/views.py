@@ -58,6 +58,7 @@ class RepoUpdateView(APIView):
     def patch(self, request, identifier):
         try:
             repo = repoIntegration.objects.get(id=identifier)
+            print(request.data)
             serializer = repoIntegrationSerializer(repo, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
@@ -133,8 +134,12 @@ class WebhookAPIView(generics.ListAPIView):
         dict = self.serializer_class(last_migrate, many=True)
         migration = migrationConfig.objects.get(id_repo=identifier)
         repo = repoIntegration.objects.get(pk=identifier)
+        # print(repo.token)
         repo.decrypt()
-        print(migration.folder_location)
+        # print(migration.folder_location)
+        # migration.decrypt()
+        # print(migration.db_password)
+        # print(repo.token)
         gh = githubHelper(repo.repo_url, migration.folder_location, repo.branch, repo.token)
         list_file = gh.get_list_file()
         author = gh.get_last_commit_author()

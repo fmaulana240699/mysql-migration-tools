@@ -1,7 +1,7 @@
 <template>
   <div class="form-mid">
     <h1>Update Repo Integration</h1>
-    
+
     <div v-if="showAlert" class="alert">
       <span class="closebtn" @click="closeAlert">&times;</span>
       <strong>Oops!</strong> {{ alertMessage }}
@@ -12,7 +12,7 @@
         <label for="name">Name:</label>
         <input type="text" id="name" v-model="formData.name" required />
       </div>
-      
+
       <div class="form-group">
         <label for="username">Username:</label>
         <input type="text" id="username" v-model="formData.username" required />
@@ -21,18 +21,18 @@
       <div class="form-group">
         <label for="branch">Branch:</label>
         <input type="text" id="branch" v-model="formData.branch" required />
-      </div>      
-      
+      </div>
+
       <div class="form-group">
         <label for="token">Token:</label>
-        <input type="password" id="token" />
+        <input type="password" id="token" v-model="formData.token"/>
       </div>
-      
+
       <div class="form-group">
         <label for="repo_url">Repository URL:</label>
         <input type="text" id="repo_url" v-model="formData.repo_url" required />
       </div>
-      
+
       <button type="submit" class="button-84">Submit</button>
     </form>
   </div>

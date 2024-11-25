@@ -1,7 +1,7 @@
 <template>
   <div class="form-mid">
     <h1>Update Migration Config</h1>
-    
+
     <div v-if="showAlert" class="alert">
       <span class="closebtn" @click="closeAlert">&times;</span>
       <strong>Oops!</strong> {{ alertMessage }}
@@ -12,17 +12,17 @@
         <label for="folder_location">Folder Location :</label>
         <input type="text" id="folder_location" v-model="formData.folder_location" required />
       </div>
-      
+
       <div class="form-group">
         <label for="db_host">Database Host :</label>
         <input type="text" id="db_host" v-model="formData.db_host" required />
       </div>
-      
+
       <div class="form-group">
         <label for="db_user">Database Username :</label>
         <input type="text" id="db_user" v-model="formData.db_user" required />
       </div>
-      
+
       <div class="form-group">
         <label for="db_name">Database Name :</label>
         <input type="text" id="db_name" v-model="formData.db_name" required />
@@ -30,14 +30,14 @@
 
       <div class="form-group">
         <label for="db_password">Database Password :</label>
-        <input type="password" id="db_password" />
-      </div>    
-      
+        <input type="password" id="db_password" v-model="formData.db_password"/>
+      </div>
+
       <div class="form-group">
         <label for="id_repo">Repo :</label>
         <input type="text" id="id_repo" v-model="formData.id_repo" v-for="repo in repoList" :key="repo.id" :value="repo.name" disabled />
-      </div>          
-      
+      </div>
+
       <button type="submit" class="button-84">Submit</button>
     </form>
   </div>

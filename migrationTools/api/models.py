@@ -64,7 +64,7 @@ class migrationConfig(models.Model):
     db_host = models.CharField(max_length=20, null=True)
     db_user = models.CharField(max_length=20, null=True)
     db_name = models.CharField(max_length=20, null=True)
-    db_password = models.CharField(max_length=100, null=True)
+    db_password = models.CharField(max_length=400, null=True)
     author = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, to_field='username')
     
     def encrypt(self,raw_password):
