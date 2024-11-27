@@ -9,6 +9,7 @@ class mysqlHelper():
         self.sql_commands = sql_commands
 
     def execute_query(self, batch_version):
+        connection = None
         try:
             # Establish a connection to the MySQL server
             connection = mysql.connector.connect(
@@ -18,37 +19,44 @@ class mysqlHelper():
                 database=self.database
             )
 
-            connection.start_transaction()
-
-            # Check if the connection was successful
             if connection.is_connected():
                 print("Connected to MySQL database")
 
-                try:
-                    #### create table migration on target db if not exist ####
-                    cursor = connection.cursor(buffered=True)
-                    cursor.execute("CREATE TABLE IF NOT EXISTS schema_migration_version (id INT AUTO_INCREMENT PRIMARY KEY, batch_version VARCHAR(255))")
+            connection.start_transaction()
+            cursor = connection.cursor(buffered=True)
 
-                    cursor.execute(self.sql_commands, multi=True)
-                   
-                    #### update migration batch version ####
-                    cursor.execute("INSERT INTO schema_migration_version (batch_version) VALUES (%s) ON DUPLICATE KEY UPDATE batch_version = VALUES(batch_version)", (batch_version,))
+            # Create migration table if not exists
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS schema_migration_version (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    batch_version VARCHAR(255)
+                )
+            """)
 
-                    print("SQL commands executed successfully")
-                except mysql.connector.Error as e:
-                    connection.rollback()
-                    print("Error executing SQL commands:", e)
-                    raise Exception("Error executing SQL commands: " + str(e))
-                finally:
-                    cursor.close()  
+            # Execute SQL commands
+            for result in cursor.execute(self.sql_commands, multi=True):
+                if result.with_rows:
+                    result.fetchall()
+
+            # Insert or update the migration batch version
+            cursor.execute("""
+                INSERT INTO schema_migration_version (batch_version)
+                VALUES (%s)
+                ON DUPLICATE KEY UPDATE batch_version = VALUES(batch_version)
+            """, (batch_version,))
+
+            connection.commit()
+            print("SQL commands executed successfully")
 
         except mysql.connector.Error as e:
-            print("Error connecting to MySQL:", e)
-            raise Exception("Error connecting to MySQL: " + str(e))
+            if connection:
+                connection.rollback()
+            print("Error:", e)
+            raise
 
         finally:
-            # Close the connection
-            if 'connection' in locals() and connection.is_connected():
-                connection.commit()
+            if connection and connection.is_connected():
+                if 'cursor' in locals():
+                    cursor.close()
                 connection.close()
                 print("MySQL connection closed")
