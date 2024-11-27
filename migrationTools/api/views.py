@@ -122,10 +122,12 @@ class WebhookAPIView(generics.ListAPIView):
         return string.split('/')[-1]
 
     def filter_batch(self, string):
-        pattern = r"/(\d{4}-\d{2}-\d{2}-\d{3})-"
+        pattern = r"(\d{14})"
         match = re.search(pattern, string)
 
-        return match.group(1)
+        if match:
+            return match.group(1)
+        return None
 
     def post(self, request, identifier):
 
