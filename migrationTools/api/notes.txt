@@ -1,12 +1,13 @@
-# 1. check worker status, kalo ada lanjut, kalo kosong failed
-# 2. check db connection first, if ok cont, else return error
-# 3. pas run kalo error update status jadi error
-# error log muncul
-# 4. tampilan scroll sama position box bermasalah
+# 1. check worker status, kalo ada lanjut, kalo kosong failed > done
+# 2. check db connection first, if ok cont, else return error > done
+# 3. pas run kalo error update status jadi error > done
+# error log muncul > done
+# 4. tampilan scroll sama position box bermasalah > done
+# user role > done
+# dibuat pagination per 5 > done
 
-# dibuat pagination per 5
 # kalo ada file baru jalanin yg lama atau ngga
-# text logout
-# ukuran select option disamakan
 # verify config repo
-# user role
+# ukuran select option disamakan
+# text logout
+# scheduler check task timeout

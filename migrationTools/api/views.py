@@ -156,31 +156,26 @@ class WebhookAPIView(generics.ListAPIView):
         dict = self.serializer_class(last_migrate, many=True)
         migration = migrationConfig.objects.get(id_repo=identifier)
         repo = repoIntegration.objects.get(pk=identifier)
-        # print(repo.token)
         repo.decrypt()
-        # print(migration.folder_location)
-        # migration.decrypt()
-        # print(migration.db_password)
-        # print(repo.token)
         gh = githubHelper(repo.repo_url, migration.folder_location, repo.branch, repo.token)
         list_file = gh.get_list_file()
         author = gh.get_last_commit_author()
-        # print(list_file)
-        # for x in list_file:
-        #     print(str(self.filter_file_name(x)))
-        # print("testing")
-        # for y in dict.data:
-        #     print(y["file_name"])
 
         for file_name in list_file:
             found = False
             for item in dict.data:
-                if file_name in item["file_name"]:
+                # print("file name : " + file_name)
+                # print("item file name : " + item["file_name"])
+                if  item["file_name"] in file_name:
+                    print(file_name)
+                    print(item["file_name"])
                     found = True
+                    print(item["file_name"])
                     pass
             if not found:
                 self.not_yet.append(file_name)
-        print(len(self.not_yet))
+                print("ga nemu")
+        # print(len(self.not_yet))
         test = list(set(self.not_yet))
 
         if len(test) != 0:
@@ -192,7 +187,7 @@ class WebhookAPIView(generics.ListAPIView):
                 repo_integration_instance = repoIntegration.objects.get(pk=identifier)
 
                 #check worker
-                check_worker = self.get_celery_worker_status()
+                check_worker = True #self.get_celery_worker_status()
                 if check_worker:
                     # put on celery to for the query to be executed
                     for p in query:
@@ -215,7 +210,7 @@ class WebhookAPIView(generics.ListAPIView):
 
 
 class HistoryPagination(PageNumberPagination):
-    page_size = 10
+    page_size = 5
     page_size_query_param = 'page_size'
     max_page_size = 20
 
@@ -227,7 +222,7 @@ class MigrationHistoryListView(APIView):
     def get(self, request):
         items = migrationData.objects.all()
         paginator = HistoryPagination()
-        result_page = paginator.paginate_queryset(items, request)
+        result_page = paginator.paginate_queryset(items, request, view=self)
         for item in result_page:
             item.created_at = item.created_at.strftime("%Y-%m-%d %H:%M")
             item.updated_at = item.updated_at.strftime("%Y-%m-%d %H:%M")

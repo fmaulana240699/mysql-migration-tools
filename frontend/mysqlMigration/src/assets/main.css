@@ -85,7 +85,7 @@ body{
     box-shadow: 0 0 20px rgba(0,0,0,0.1);
     border-radius: 10px;
   }
-  
+
   th {
     color: white;
     padding: 15px;
@@ -97,17 +97,17 @@ body{
     color: #333;
     text-align: center;
   }
-  
+
   th {
     text-align: center;
   }
-  
+
   thead {
     th {
       background-color: #55608f;
     }
   }
-  
+
   tbody {
     tr {
       &:hover {
@@ -193,7 +193,7 @@ body{
   border-radius: 10px;
   padding: 20px 50px 40px;
   box-shadow: 1px 4px 10px 1px #aaa;
-  font-family: sans-serif;  
+  font-family: sans-serif;
 }
 
 .form-mid form {
@@ -218,9 +218,9 @@ body{
 
 .scrollable-table {
   width: 100%;
-  overflow-y: scroll;
-  max-height: 750px; 
-  display: block;
+  max-height: 500px; /* Adjust the height as needed */
+  /* overflow-y: auto; Scrollable when content overflows */
+  border: 1px solid #ddd; /* Optional: for better visual separation */
 }
 
 select {

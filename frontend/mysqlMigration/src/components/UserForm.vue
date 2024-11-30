@@ -23,9 +23,18 @@
           <input type="password" id="password" v-model="formData.password" placeholder="password" required />
         </div>
 
-        <div class="form-group">
+        <!-- <div class="form-group">
           <label for="role">Role:</label>
           <input type="text" id="role" v-model="formData.role" placeholder="Role User" required />
+        </div> -->
+
+        <div class="form-group">
+          <label for="role">Role :</label>
+          <select v-model="formData.role">
+            <!-- <option v-for="repo in repoList" :key="repo.id" :value="repo.id"> {{ repo.name }}</option> -->
+            <option id="role">Admin</option>
+            <option id="role">Viewer</option>
+          </select>
         </div>
 
         <button type="submit" class="button-84">Submit</button>
