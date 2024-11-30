@@ -167,10 +167,8 @@ class WebhookAPIView(generics.ListAPIView):
                 # print("file name : " + file_name)
                 # print("item file name : " + item["file_name"])
                 if  item["file_name"] in file_name:
-                    print(file_name)
-                    print(item["file_name"])
                     found = True
-                    print(item["file_name"])
+                    print("udah pernah run")
                     pass
             if not found:
                 self.not_yet.append(file_name)
