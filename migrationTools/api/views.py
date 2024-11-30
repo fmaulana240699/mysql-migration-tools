@@ -5,6 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .github_helper import githubHelper
 import re
 import json
+import os
 from rest_framework.response import Response
 from django.template.loader import get_template
 from .tasks import execute_remote_query
@@ -22,7 +23,12 @@ from xhtml2pdf import pisa
 from io import BytesIO
 from datetime import timedelta
 from django.utils import timezone
+from celery import Celery
+# from celery.app.control import Inspect
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'migrationTools.settings')
+app = Celery('migrationTools')
+app.config_from_object('django.conf:settings', namespace='CELERY')
 
 class repoCreateListAPIView(generics.ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
@@ -129,6 +135,20 @@ class WebhookAPIView(generics.ListAPIView):
             return match.group(1)
         return None
 
+    def get_celery_worker_status(self):
+        try:
+            inspector = app.control.inspect()
+            active_workers = inspector.active()
+            if not active_workers:
+                print('No active workers found.')
+                return False
+            return True
+        except Exception as e:
+            print(f"Error : {e}")
+            return False
+
+
+
     def post(self, request, identifier):
 
         ### compare last migration ###
@@ -171,13 +191,20 @@ class WebhookAPIView(generics.ListAPIView):
 
                 repo_integration_instance = repoIntegration.objects.get(pk=identifier)
 
-                # put on celery to for the query to be executed
-                for p in query:
-                    history_id = migrationData.objects.create(sql_query=p["query"], status_query="in queue", db_name=migration.db_name, engineer_name=author, error_log=None, file_name=str(self.filter_file_name(p["file_loc"])), id_repo=repo_integration_instance)
-                    execute_remote_query.delay(p["query"], identifier, history_id.id, str(self.filter_batch(p["file_loc"])))
+                #check worker
+                check_worker = self.get_celery_worker_status()
+                if check_worker:
+                    # put on celery to for the query to be executed
+                    for p in query:
+                        history_id = migrationData.objects.create(sql_query=p["query"], status_query="in queue", db_name=migration.db_name, engineer_name=author, error_log=None, file_name=str(self.filter_file_name(p["file_loc"])), id_repo=repo_integration_instance)
+                        execute_remote_query.delay(p["query"], identifier, history_id.id, str(self.filter_batch(p["file_loc"])))
 
-                test.clear()
-                self.not_yet.clear()
+                    test.clear()
+                    self.not_yet.clear()
+                else:
+                    for p in query:
+                        history_id = migrationData.objects.create(sql_query=p["query"], status_query="Error", db_name=migration.db_name, engineer_name=author, error_log="No Worker Found", file_name=str(self.filter_file_name(p["file_loc"])), id_repo=repo_integration_instance)
+                    return Response("No Worker Found", status=500)
             except Exception as e:
                 print(e)
                 return Response("error", status=400)

@@ -19,3 +19,5 @@ def execute_remote_query(sql_query, id_repo, history_id, batch_version):
         notif.slack()
         migrationData.objects.filter(id=history_id).update(status_query="error", error_log=str(e), id_repo=repo_integration_instance, db_name=creds.db_name)
         return e
+
+#

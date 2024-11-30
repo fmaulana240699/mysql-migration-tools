@@ -1,0 +1,12 @@
+# 1. check worker status, kalo ada lanjut, kalo kosong failed
+# 2. check db connection first, if ok cont, else return error
+# 3. pas run kalo error update status jadi error
+# error log muncul
+# 4. tampilan scroll sama position box bermasalah
+
+# dibuat pagination per 5
+# kalo ada file baru jalanin yg lama atau ngga
+# text logout
+# ukuran select option disamakan
+# verify config repo
+# user role
