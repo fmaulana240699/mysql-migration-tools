@@ -7,12 +7,12 @@
           <li class="forward" v-if="role === 'Admin'"><RouterLink to="/migrations/config">Migration Config</RouterLink></li>
           <li class="forward" ><RouterLink to="/migrations">Migration History</RouterLink></li>
           <li class="forward"v-if="role === 'Admin'"><RouterLink to="/users">Users</RouterLink></li>
-          <li class="forward" @click="logout">Logout</li>
+          <li class="forward" @click="logout" style="font-size: 20px; color: #333; font-weight: 500;">Logout</li>
         </ul>
       </nav>
   </header>
   </template>
-  
+
   <script>
   import { RouterLink, RouterView } from 'vue-router'
 
@@ -29,19 +29,19 @@
       isLoggedIn() {
         return localStorage.getItem('role') !== null;
       }
-    },    
+    },
     methods: {
       logout() {
       localStorage.removeItem('role');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('fullname');
-      
+
       window.location.href = '/login';
     }
     }
   };
   </script>
-  
+
   <style scoped>
   .nav-header {
     display: flex;
@@ -50,15 +50,15 @@
     padding: 10px;
     background-color: #f0f0f0;
   }
-  
+
   .nav-item {
     cursor: pointer;
   }
-  
+
   .dropdown {
     position: relative;
   }
-  
+
   .dropdown-menu {
     position: absolute;
     top: 100%;
@@ -68,18 +68,17 @@
     padding: 5px;
     display: none;
   }
-  
+
   .dropdown-menu span {
     display: block;
     cursor: pointer;
   }
-  
+
   .dropdown-menu span:hover {
     background-color: #f0f0f0;
   }
-  
+
   .show {
     display: block;
   }
   </style>
-  
