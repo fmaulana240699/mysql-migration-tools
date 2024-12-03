@@ -60,3 +60,32 @@ class mysqlHelper():
                     cursor.close()
                 connection.close()
                 print("MySQL connection closed")
+
+class MysqlConnection():
+    def __init__(self, host, username, password, database):
+        self.host = host
+        self.username = username
+        self.password = password
+        self.database = database
+
+    def testing_connection(self):
+        connection = None
+        try:
+            # Establish a connection to the MySQL server
+            connection = mysql.connector.connect(
+                host=self.host,
+                user=self.username,
+                password=self.password,
+                database=self.database
+            )
+
+            if connection.is_connected():
+                print("Connected to MySQL database")
+                connection.close()
+                return True
+            return False
+        except mysql.connector.Error as e:
+            if connection:
+                connection.rollback()
+            print("Error:", e)
+            return False

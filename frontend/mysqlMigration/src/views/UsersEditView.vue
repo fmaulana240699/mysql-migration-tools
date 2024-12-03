@@ -1,7 +1,7 @@
 <template>
   <div class="form-mid">
     <h1>Update User</h1>
-    
+
     <div v-if="showAlert" class="alert">
       <span class="closebtn" @click="closeAlert">&times;</span>
       <strong>Oops!</strong> {{ alertMessage }}
@@ -12,22 +12,25 @@
         <label for="fullname">Fullname:</label>
         <input type="text" id="fullname" v-model="formData.fullname" placeholder="Fullname" required />
       </div>
-      
+
       <div class="form-group">
         <label for="username">Username:</label>
         <input type="text" id="username" v-model="formData.username" placeholder="Username" required />
       </div>
-      
+
       <div class="form-group">
         <label for="password">Password:</label>
         <input type="password" id="password" v-model="formData.password" placeholder="Password" />
       </div>
-      
+
       <div class="form-group">
-        <label for="role">Role:</label>
-        <input type="text" id="role" v-model="formData.role" placeholder="Role" required />
-      </div>
-      
+          <label for="role">Role :</label>
+          <select v-model="formData.role">
+            <option id="role">Admin</option>
+            <option id="role">Viewer</option>
+          </select>
+        </div>
+
       <button type="submit" class="button-84">Submit</button>
     </form>
   </div>
@@ -93,7 +96,7 @@ export default {
   },
   mounted() {
     this.fetchData();
-  },  
+  },
 };
 </script>
 

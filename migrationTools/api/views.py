@@ -2,7 +2,8 @@ from .models import migrationData, repoIntegration, migrationConfig, Users
 from .serializers import migrationDataSerializer, repoIntegrationSerializer, migrationConfigSerializer, UserSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .github_helper import githubHelper
+from .github_helper import githubHelper, ConnectionTesting
+from .mysql_helper import MysqlConnection
 import re
 import json
 import os
@@ -24,7 +25,6 @@ from io import BytesIO
 from datetime import timedelta
 from django.utils import timezone
 from celery import Celery
-# from celery.app.control import Inspect
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'migrationTools.settings')
 app = Celery('migrationTools')
@@ -35,6 +35,19 @@ class repoCreateListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated & IsAdmin]
     queryset = repoIntegration.objects.all()
     serializer_class = repoIntegrationSerializer
+
+    def post(self, request):
+        data = request.data
+        gh = ConnectionTesting(data["repo_url"], data["token"])
+        if gh.check():
+            serializer = self.serializer_class(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'message': 'Repository successfully created'}, status=200)
+            else:
+                return Response(serializer.errors, status=400)
+        else:
+            return Response({'message': 'Github connection problem'}, status=500)
 
 class RepoDeleteView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -78,6 +91,20 @@ class migrationConfigCreateListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated & IsAdmin]
     queryset = migrationConfig.objects.all()
     serializer_class = migrationConfigSerializer
+
+    def post(self, request):
+        data = request.data
+        check = MysqlConnection(data["db_host"],data["db_user"],data["db_password"],data["db_name"])
+
+        if check.testing_connection():
+            serializer = self.serializer_class(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=200)
+            else:
+                return Response(serializer.errors, status=400)
+        else:
+            return Response({'message': 'Database connection problem'}, status=500)
 
 class MigrationConfigDeleteView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -164,8 +191,6 @@ class WebhookAPIView(generics.ListAPIView):
         for file_name in list_file:
             found = False
             for item in dict.data:
-                # print("file name : " + file_name)
-                # print("item file name : " + item["file_name"])
                 if  item["file_name"] in file_name:
                     found = True
                     print("udah pernah run")
@@ -173,7 +198,6 @@ class WebhookAPIView(generics.ListAPIView):
             if not found:
                 self.not_yet.append(file_name)
                 print("ga nemu")
-        # print(len(self.not_yet))
         test = list(set(self.not_yet))
 
         if len(test) != 0:
@@ -296,7 +320,6 @@ class UserDeleteView(APIView):
 
     def delete(self, request):
         user_id = request.data.get('id')
-        print(user_id)
         try:
             user = Users.objects.get(id=user_id)
             user.delete()

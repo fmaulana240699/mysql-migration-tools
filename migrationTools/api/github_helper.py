@@ -44,3 +44,17 @@ class githubHelper():
         except Exception as e:
             print("An error occurred:", e)
             return e
+
+class ConnectionTesting():
+    def __init__(self, repo_name, github_token):
+        self.github_token =  github_token
+        self.repo_name =  repo_name
+
+    def check(self):
+        g = Github(self.github_token)
+        try:
+            test = g.get_user()
+            test.login
+            return True
+        except Exception as e:
+            return False
