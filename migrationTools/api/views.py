@@ -38,7 +38,7 @@ class repoCreateListAPIView(generics.ListCreateAPIView):
 
     def post(self, request):
         data = request.data
-        gh = ConnectionTesting(data["repo_url"], data["token"])
+        gh = ConnectionTesting(data["repo_url"], data["token"], data["branch"])
         if gh.check():
             serializer = self.serializer_class(data=data)
             if serializer.is_valid():
@@ -69,6 +69,7 @@ class RepoUpdateView(APIView):
     def get(self, request, identifier):
         try:
             repo = repoIntegration.objects.get(id=identifier)
+            repo.decrypt()
             repo = model_to_dict(repo)
             return Response(repo, status=200)
         except repoIntegration.DoesNotExist:
@@ -77,12 +78,15 @@ class RepoUpdateView(APIView):
     def patch(self, request, identifier):
         try:
             repo = repoIntegration.objects.get(id=identifier)
-            print(request.data)
             serializer = repoIntegrationSerializer(repo, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=200)
-            return Response(serializer.errors, status=400)
+            gh = ConnectionTesting(request.data["repo_url"], request.data["token"], request.data["branch"])
+            if gh.check():
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=200)
+                return Response(serializer.errors, status=400)
+            else:
+                return Response({'message': 'Github connection problem'}, status=500)
         except repoIntegration.DoesNotExist:
             return Response({'message': 'Repository tidak ditemukan'}, status=404)
 
@@ -95,8 +99,10 @@ class migrationConfigCreateListAPIView(generics.ListCreateAPIView):
     def post(self, request):
         data = request.data
         check = MysqlConnection(data["db_host"],data["db_user"],data["db_password"],data["db_name"])
-
-        if check.testing_connection():
+        repo = repoIntegration.objects.get(id=data["id_repo"])
+        repo.decrypt()
+        test_folder = ConnectionTesting(repo.repo_url, repo.token, repo.branch, data["folder_location"])
+        if check.testing_connection() and test_folder.check_folder():
             serializer = self.serializer_class(data=data)
             if serializer.is_valid():
                 serializer.save()
@@ -104,7 +110,7 @@ class migrationConfigCreateListAPIView(generics.ListCreateAPIView):
             else:
                 return Response(serializer.errors, status=400)
         else:
-            return Response({'message': 'Database connection problem'}, status=500)
+            return Response({'message': 'Database/Github connection problem'}, status=500)
 
 class MigrationConfigDeleteView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -127,19 +133,29 @@ class MigrationConfigUpdateView(APIView):
     def get(self, request, identifier):
         try:
             migration = migrationConfig.objects.get(id=identifier)
+            migration.decrypt()
             migration = model_to_dict(migration)
             return Response(migration, status=200)
         except migrationConfig.DoesNotExist:
             return Response({'message': 'Migration tidak ditemukan'}, status=404)
 
     def patch(self, request, identifier):
+        check = MysqlConnection(request.data["db_host"],request.data["db_user"],request.data["db_password"],request.data["db_name"])
+
+
         try:
             migration = migrationConfig.objects.get(id=identifier)
             serializer = migrationConfigSerializer(migration, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=200)
-            return Response(serializer.errors, status=400)
+            repo = repoIntegration.objects.get(id=migration.id_repo.id)
+            repo.decrypt()
+            test_folder = ConnectionTesting(migration.id_repo.repo_url, repo.token, migration.id_repo.branch, migration.folder_location)
+            if check.testing_connection() and test_folder.check_folder():
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=200)
+                return Response(serializer.errors, status=400)
+            else:
+                return Response({'message': 'Database/Github connection problem'}, status=500)
         except migrationConfig.DoesNotExist:
             return Response({'message': 'Migration config tidak ditemukan'}, status=404)
 

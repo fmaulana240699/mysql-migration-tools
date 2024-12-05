@@ -54,8 +54,10 @@
                 </g> </svg> </button> </td>
         </tr>
         <tr>
-            <td colspan="9"> <button class="button-84" @click="navigatePage(prevPage)" :disabled="!prevPage">Previous</button>
-    <button class="button-84" @click="navigatePage(nextPage)" :disabled="!nextPage">Next</button> </td>
+          <td colspan="9" style="text-align: center;">
+            <button  v-if="prevPage"  class="button-84"  @click="navigatePage(prevPage)">  Previous</button>
+            <button v-if="nextPage" class="button-84" @click="navigatePage(nextPage)"> Next </button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -81,6 +83,14 @@ export default {
   mounted() {
     this.fetchItems();
   },
+  // computed: {
+  //   canNavigatePrev() {
+  //     return this.currentPage > 1;
+  //   },
+  //   canNavigateNext() {
+  //     return this.nextPage && this.migrations.length > 5;
+  //   },
+  // },
   methods: {
     async fetchItems(url = '/migration/') {
       try {
@@ -93,6 +103,10 @@ export default {
         this.handleError(error, 'Error fetching items');
       }
     },
+    // getCurrentPageFromUrl(url) {
+    //   const params = new URLSearchParams(url.split("?")[1]);
+    //   return parseInt(params.get("page")) || 1;
+    // },
     async navigatePage(url){
       if (url){
         this.fetchItems(url);

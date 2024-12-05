@@ -46,15 +46,29 @@ class githubHelper():
             return e
 
 class ConnectionTesting():
-    def __init__(self, repo_name, github_token):
+    def __init__(self, repo_name, github_token, branch, file_location=None):
         self.github_token =  github_token
         self.repo_name =  repo_name
+        self.branch = branch
+        self.file_location = file_location
 
     def check(self):
         g = Github(self.github_token)
         try:
             test = g.get_user()
             test.login
+            repo = g.get_repo(self.repo_name)
+            branch = repo.get_branch(self.branch)
             return True
         except Exception as e:
+            return False
+
+    def check_folder(self):
+        g = Github(self.github_token)
+        try:
+            test = g.get_repo(self.repo_name)
+            print(test.get_contents(self.file_location, ref=self.branch))
+            return True
+        except Exception as e:
+            print(e)
             return False

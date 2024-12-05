@@ -101,7 +101,7 @@ export default {
     },
     handleError(error, customMessage) {
       if (error.response) {
-        this.alertMessage = `${customMessage}: ${error.response.status} ${error.response.data.message || error.response.statusText}`;
+        this.alertMessage = `${error.response.data.message || error.response.statusText}`;
       } else {
         this.alertMessage = `${customMessage}: ${error.message}`;
       }
