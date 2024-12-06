@@ -15,6 +15,19 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+  mysql-5.7:
+    image: mysql:5.7
+    container_name: mysql-5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: skripsi
+      MYSQL_DATABASE: app
+      MYSQL_USER: cris
+      MYSQL_PASSWORD: skripsipassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data_2:/var/lib/mysql
 
   # Redis container
   redis:
@@ -96,3 +109,4 @@ volumes:
   mysql_data:
   caddy_data:
   caddy_config:
+  mysql_data_2:
