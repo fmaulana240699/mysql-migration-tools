@@ -12,12 +12,12 @@ def execute_remote_query(sql_query, id_repo, history_id, batch_version):
     try:
         testing.execute_query(batch_version)
         migrationData.objects.filter(id=history_id).update(status_query="success", id_repo=repo_integration_instance, db_name=creds.db_name)
-        notif = SendNotif(creds.pk, creds.db_name, creds.author, "-", "Success")
+        notif = SendNotif(creds.pk, creds.db_name, creds.author, "-", "Success", repo_integration_instance.name)
         notif.slack()
     except Exception as e:
         migrationData.objects.filter(id=history_id).update(status_query="Error", error_log=str(e), id_repo=repo_integration_instance, db_name=creds.db_name)
         print("Error Gan")
-        notif = SendNotif(creds.pk, creds.db_name, creds.author, e, "Error")
+        notif = SendNotif(creds.pk, creds.db_name, creds.author, e, "Error", repo_integration_instance.name)
         notif.slack()
         return e
 
