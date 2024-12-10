@@ -18,7 +18,7 @@ class SendNotif():
     def slack(self):
         payload = {
             "text": (f"Time: {self.date.strftime('%Y-%m-%d %H:%M')} \n"
-                     f"Repository Name: {self.migconfig} \n"
+                     f"Repository Name: {self.repo_name} \n"
                      f"Config Migration: {self.migconfig} \n"
                      f"Database Name: {self.db_name} \n"
                      f"Author: {self.author} \n"
